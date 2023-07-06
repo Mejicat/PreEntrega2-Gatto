@@ -1,71 +1,167 @@
-//Calculadora de rendimiento CDI (Brasil) para Montos de Inversión ingresado por el usuario, mostrando en ciclo otros rendimientos dado ese monto incrementado cada 10.000 con tope 30.000
-
-//Usuario ingresa el monto de inversión, validando que éste sea un número. En caso no lo sea, le doy oportunidad infinita hasta que ingrese un número
-let montoInversion = prompt("Ingrese el monto que desea invertir")
-let montoInversionNumerico = parseFloat(montoInversion)
-while (isNaN(montoInversionNumerico)) {
-  montoInversion = prompt("El valor ingresado no es un número válido. Ingrese nuevamente el monto:")
-  montoInversionNumerico = parseFloat(montoInversion);
-}
-
 //Defino a las opciones de inversión, para que el usuario escoja cuál desea ver y conozca su CDI
-let opcionesInversion = [
+const opcionesInversion = [
   {
-    title: 'recargapay',
+    title: 'Recargapay',
     porcentajeCDI: 1.02,
+    rutaImagen: "Recargapay.png",
     id: 1010
   },
   {
-    title: 'picpay',
+    title: 'Picpay',
     porcentajeCDI: 1.00,
+    rutaImagen: "Picpay.png",
     id: 1020
   },
   {
-    title: 'mercado pago',
+    title: 'Mercado pago',
     porcentajeCDI: 1.00,
+    rutaImagen: "Mercadopago.png",
     id: 1030
   }
 ]
 
-// Muestro las opciones de inversión ordenadas por porcentajeCDI
-let listado = ""
-opcionesInversion.sort((a, b) => b.porcentajeCDI - a.porcentajeCDI)
-opcionesInversion.forEach(opcionInversion => {
-listado += opcionInversion.title + " " + opcionInversion.porcentajeCDI + "\n"
-})
-alert ("Las oferentes y sus multiplicadores son: " + "\n" + listado)
+const contenedor = document.getElementById("oferentes") // Contenedor donde se mostrarán las opciones de Inversión
 
-// Pido al usuario elija entras las opciones de inversión
-let inversionDeseada = prompt("Ingrese opción de inversión que desea \n * recargapay \n * picpay \n * mercado pago \n y conoce el multiplicador de tu rendimiento ")
-let inversionElegida = opcionesInversion.find(opcionInversion => opcionInversion.title.toLowerCase() === inversionDeseada.toLowerCase())
+// Variables para almacenar la opción de inversión elegida y su status
+let oferenteSeleccionado = null
+let oferenteSeleccionadoFlag = false
 
-if (inversionElegida) {
-  alert("El multiplicador CDI de la opción elegida es: " + inversionElegida.porcentajeCDI)
+let consulta = { resultados: [] } // Almaceno los resultados de la consulta
 
-//Defino parámetros generales y funciones para el cálculo de la rentabilidad
-let taxaCDI = 0.1365
-let diasUtilesAnio = 252
-let monto = montoInversionNumerico
-let incremento = 10000
-let capitalConFactor, capitalConIntereses
+crearTarjetas(opcionesInversion)
 
-function rendimientoDiario(monto, factorDiario) {
-  let valor = monto * factorDiario
-  return valor
+function crearTarjetas(opciones) { // Creo las tarjetas con las opciones de inversión
+  contenedor.innerHTML = "" // Limpio el contenido del contenedor
+  opciones.forEach(opcion => {
+    const opcionInversion = document.createElement("div")
+    opcionInversion.className = "tarjetaOpcionInversion"
+    opcionInversion.innerHTML = `
+      <h4>${opcion.title}</h4>
+      <img class="imagen" src="multimedia/${opcion.rutaImagen}">
+      <h4>Multiplicador CDI: ${opcion.porcentajeCDI}</h4>
+      <button id="${opcion.id}" class="botones">Calculá tu rendimiento</button>
+    `
+    contenedor.appendChild(opcionInversion) // Agrego la tarjeta al contenedor
+    const botonCalculaTuRendimiento = document.getElementById(opcion.id)
+    botonCalculaTuRendimiento.addEventListener("click", () => {
+      oferenteSeleccionado = opcion
+      oferenteSeleccionadoFlag = true
+      mostrarFormulario()
+    })
+  })
 }
 
-//Calculo la rentabilidad dada la elección del usuario y presento en ciclo opciones hasta 30.000 R$, de a cada R$ 10.000
-for (let monto = montoInversionNumerico; monto <= 30000; monto += incremento) {
-  let factorDiario = parseFloat((((1 + taxaCDI) ** (1 / diasUtilesAnio)) - 1) * inversionElegida.porcentajeCDI)
-  capitalConFactor = rendimientoDiario(monto, factorDiario)
-  capitalConIntereses = capitalConFactor + monto
-  alert ("Para un monto de " + monto.toFixed(2) + " R$" + "\n" + "El rendimiento diario es " + capitalConFactor.toFixed(2) + " R$" + "\n" + "Su capital más intereses será " + capitalConIntereses.toFixed(2) + " R$")
+const buscador = document.getElementById("buscador") // Obtengo el elemento del buscador
+buscador.addEventListener("input", filtrar)
+
+function filtrar() { // Filtro según el texto buscado (por nombre o %CDI), normalizando los caracteres
+  const textoBuscado = buscador.value.toLowerCase()
+  const arrayFiltrado = opcionesInversion.filter(opcion =>
+    opcion.title.toLowerCase().includes(textoBuscado) || opcion.porcentajeCDI.toString().includes(textoBuscado)
+  )
+  crearTarjetas(arrayFiltrado)
 }
 
-} else {
-  alert("La opción de inversión ingresada no es válida. Refresque la pantalla y vuelva a comenzar por favor")
+function mostrarFormulario() { // Función para generar el input donde el usuario colocará el monto a invertir
+  contenedor.innerHTML = "" // Limpio el contenido
+  const formulario = document.createElement("div")
+  formulario.innerHTML = `
+    <h3>Ingrese el monto de inversión:</h3>
+    <input type="number" id="montoInversion">
+    <button id="btnInvertir">Invertir</button>
+  `
+  contenedor.appendChild(formulario)
+  const btnInvertir = document.getElementById("btnInvertir")
+  btnInvertir.classList.add("botones") // Agrego la clase "botones" para darle estilos en el CSS
+  btnInvertir.addEventListener("click", invertir)
 }
 
+function invertir() {
+  const montoInversion = parseFloat(document.getElementById("montoInversion").value) // Convierto a número el monto ingresado
+  if (oferenteSeleccionadoFlag) {
+    if (!isNaN(montoInversion) && montoInversion > 0) { // Verifico que es un número y mayor que 0
+      const taxaCDI = 0.1365
+      const diasUtilesAnio = 252
+      const incremento = 10000
+      let capitalConFactor, capitalConIntereses
 
+      function rendimientoDiario(monto, factorDiario) {
+        return monto * factorDiario
+      }
 
+      const resultadoRentabilidad = document.getElementById("resultadoRentabilidad")
+      resultadoRentabilidad.innerHTML = ""
 
+      const listaResultados = document.createElement("ol") // Creo una lista para guardar los resultados
+      const consulta = {
+        montoInversion,
+        resultados: []
+      }
+
+      for (let monto = montoInversion; monto <= 30000; monto += incremento) { // Realizo el cálculo para diferentes montos de inversión, de a 10.000 con tope 30.000
+        const factorDiario = (((1 + taxaCDI) ** (1 / diasUtilesAnio)) - 1) * oferenteSeleccionado.porcentajeCDI
+        capitalConFactor = rendimientoDiario(monto, factorDiario)
+        capitalConIntereses = capitalConFactor + monto
+
+        const resultado = document.createElement("li")
+        resultado.innerHTML = `<strong>Para un monto de ${monto.toFixed(2)} R$:</strong>
+          <ul>
+            <li>El rendimiento diario es ${capitalConFactor.toFixed(2)} R$</li>
+            <li>Su capital más intereses será ${capitalConIntereses.toFixed(2)} R$</li>
+          </ul>`
+
+        listaResultados.appendChild(resultado)
+
+        consulta.resultados.push({ // Agrego el resultado a la consulta actual
+          montoInversion: monto,
+          rendimientoDiario: capitalConFactor,
+          capitalConIntereses
+        })
+      }
+
+      localStorage.setItem("consulta", JSON.stringify(consulta)) // Guardo la consulta en el Local Storage
+      resultadoRentabilidad.appendChild(listaResultados)
+      mostrarBotonGuardar()
+    }
+  } else { // Este ELSE quedó vacío porque antes agregué un Alert si el usuario ingreso un valor no numérico, pero ya subí validaciones para ello
+  }
+}
+
+function mostrarBotonGuardar() { // Genero y muestro el botón de Guardar resultado
+  const resultadoRentabilidad = document.getElementById("resultadoRentabilidad")
+  const botonGuardar = document.createElement("button")
+  botonGuardar.textContent = "Guardar resultado"
+  botonGuardar.classList.add("botones") // Agrego la clase "botones" para darle estilos en el CSS
+  botonGuardar.addEventListener("click", guardarYMostrarAlerta)
+  resultadoRentabilidad.appendChild(botonGuardar)
+}
+
+function guardarYMostrarAlerta() {
+  guardarResultado()
+  mostrarAlerta() 
+}
+
+function guardarResultado() { 
+  let consultaGuardada = localStorage.getItem("consulta") // Obtengo la consulta guardada en el local storage
+
+  if (consultaGuardada) {
+    consultaGuardada = JSON.parse(consultaGuardada)
+    consultaGuardada.resultados.push(...consulta.resultados) // Agrego los resultados de la consulta actual a los resultados guardados
+  } else {
+    consultaGuardada = consulta // Si no hay una consulta guardada, la asigno como la consulta actual
+  }
+
+  localStorage.setItem("consulta", JSON.stringify(consultaGuardada)) // Guardo la consulta actualizada en el Local Storage
+}
+
+function mostrarAlerta() { // Usando SweatAlert muestro un mensaje de Guardado exitoso
+  Swal.fire({ // Lanza alerta pasando todas sus propiedades
+    title: 'Hecho!',
+    text: 'Hemos guardado tu consulta',
+    icon: 'success',
+    customClass: {
+      confirmButton: 'swal-button--confirm'
+    },
+    timer: 2000
+  })
+}

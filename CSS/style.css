@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: "Roboto", Arial, sans-serif;
+}
+  
+h3 {
+    font-family: "Roboto", Arial, sans-serif;
+    margin-bottom: 10px;
+}
+  
+#resultadoRentabilidad {
+    margin-top: 10px;
+}  
+
+#oferentes {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.tarjetaOpcionInversion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 3px solid #191919;
+    border-radius: 5px;
+    margin: 5px;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+}
+
+.tarjetaOpcionInversion h4 {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.imagen {
+    width: 350px;
+    height: 210px;
+}
+
+.botones {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.botones:focus {
+    background-color: #19b33f;
+    outline: none;
+}
+
+#montoInversion , #buscador {
+    width: 150px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.swal-button--confirm {
+    background-color: green !important;
+    border-color: darkgreen !important;
+  }
+  
