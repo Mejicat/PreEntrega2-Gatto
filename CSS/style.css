@@ -17,6 +17,7 @@ h3 {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    margin-top: 10px;
 }
 
 .tarjetaOpcionInversion {
@@ -40,6 +41,7 @@ h3 {
 .imagen {
     width: 350px;
     height: 210px;
+    object-fit: contain; 
 }
 
 .botones {
