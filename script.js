@@ -80,7 +80,14 @@ function invertir() {
   const montoInversion = parseFloat(document.getElementById("montoInversion").value) // Convierto a número el monto ingresado
   if (oferenteSeleccionadoFlag) {
     if (!isNaN(montoInversion) && montoInversion > 0) { // Verifico que es un número y mayor que 0
-      const taxaCDI = 0.1365
+      
+      const url = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados/ultimos/1"
+      
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          const taxaCDI = data[0].valor
+      
       const diasUtilesAnio = 252
       const incremento = 10000
       let capitalConFactor, capitalConIntereses
@@ -122,6 +129,11 @@ function invertir() {
       localStorage.setItem("consulta", JSON.stringify(consulta)) // Guardo la consulta en el Local Storage
       resultadoRentabilidad.appendChild(listaResultados)
       mostrarBotonGuardar()
+    })
+
+    .catch(error => {
+    console.error("Error al obtener la tasa CDI:", error)
+    })
     }
   } else { // Este ELSE quedó vacío porque antes agregué un Alert si el usuario ingreso un valor no numérico, pero ya subí validaciones para ello
   }
@@ -138,10 +150,10 @@ function mostrarBotonGuardar() { // Genero y muestro el botón de Guardar result
 
 function guardarYMostrarAlerta() {
   guardarResultado()
-  mostrarAlerta() 
+  mostrarAlerta()
 }
 
-function guardarResultado() { 
+function guardarResultado() {
   let consultaGuardada = localStorage.getItem("consulta") // Obtengo la consulta guardada en el local storage
 
   if (consultaGuardada) {
@@ -165,3 +177,6 @@ function mostrarAlerta() { // Usando SweatAlert muestro un mensaje de Guardado e
     timer: 2000
   })
 }
+
+
+
