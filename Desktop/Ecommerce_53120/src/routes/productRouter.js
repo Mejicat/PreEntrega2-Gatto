@@ -55,7 +55,7 @@ router.post('/', uploader.array('thumbnails', 3), async (req, res) => {
     }
 });
 
-router.put('/:pid', uploader.array('thumbnails', 3), async (req, res) => {
+router.put('/:pid', uploader.array('thumbnails', 3), async (req, res) => { //Añado hasta 3 fotos para el producto
 
     if (req.files) {
         req.body.thumbnails = [];

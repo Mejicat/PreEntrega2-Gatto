@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
-const messageCollection = "messages";
+const messageCollection = "messages"
 
 const messageSchema = mongoose.Schema({
-    user: {
+    user: {          // Correo del usuario
         type: String,
         require: true
     },
@@ -13,6 +13,6 @@ const messageSchema = mongoose.Schema({
     }
 });
 
-const messageModel = mongoose.model(messageCollection, messageSchema);
+const messageModel = mongoose.model(messageCollection, messageSchema)
 
-export default messageModel;
+export default messageModel
