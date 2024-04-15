@@ -10,7 +10,8 @@ router.get('/', async (req, res) => {
     try {
         let page = parseInt (req.query.page);
         if (!page) page = 1
-        let { limit = 10, query = {}, sort = null} = req.query
+        let limit = parseInt(req.query.limit) || 10
+        let sort = {price: 1}
         const result = await ProductService.getAllProducts(limit, page, query, sort)
         const baseURL = "http://localhost:8080/products"
     res.render("./products",
