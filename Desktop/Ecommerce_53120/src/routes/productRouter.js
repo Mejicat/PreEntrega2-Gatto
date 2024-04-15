@@ -1,27 +1,47 @@
 import { Router } from 'express';
-//import { productManagerFS } from '../dao/productManagerFS.js';
 import { productManagerDB } from '../dao/productManagerDB.js';
 import { uploader } from '../utils/multerUtil.js';
 
 const router = Router();
-//const ProductService = new productManagerFS('products.json');
+
 const ProductService = new productManagerDB();
 
 router.get('/', async (req, res) => {
-    const result = await ProductService.getAllProducts();
-
-    res.send({
-        status: 'success',
-        payload: result
-    });
+    try {
+        let page = parseInt (req.query.page);
+        if (!page) page = 1
+        let { limit = 10, query = {}, sort = null} = req.query
+        const result = await ProductService.getAllProducts(limit, page, query, sort)
+        const baseURL = "http://localhost:8080/products"
+    res.render("./products",
+        {
+            style: "index.css",
+            status: 'success',
+            products: result.docs,
+            totalPages: result.totalPages,
+            prevPage: result.prevPage,
+            nextPage: result.nextPage,
+            page: page, //utilizo la variable page que yo declaré, para contemplar el caso en que no exista esa page
+            hasPrevPage: result.hasPrevPage,
+            hasNextPage: result.hasNextPage,
+            prevLink: result.prevPage ? `${baseURL}?page=${result.prevPage}` : "",
+            nextLink: result.nextPage ? `${baseURL}?page=${result.nextPage}` : "",
+          })
+        } catch (error) {
+            res.status(400).send({
+                status: 'error',
+                message: error.message
+            })
+        }
 });
 
 router.get('/:pid', async (req, res) => {
 
     try {
         const result = await ProductService.getProductByID(req.params.pid);
-        res.send({
-            status: 'success',
+        res.render("./product",
+        {
+            style: "index.css",
             payload: result
         });
     } catch (error) {

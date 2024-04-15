@@ -27,7 +27,8 @@ app.use(express.static('public'));
 //Routers
 app.use('/api/products', productRouter);
 app.use('/api/carts', cartRouter);
-app.use('/products', viewsRouter);
+app.use('/products', productRouter);
+app.use('/chat', viewsRouter);
 
 const PORT = 8080;
 const httpServer = app.listen(PORT, () => {

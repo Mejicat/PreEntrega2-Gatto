@@ -46,11 +46,11 @@ export default (io) => {
 
         socket.on("createMessage", async (data) => {
             try {
-                await MessageService.createMessage(data.user, data.message);
-                const messages = await MessageService.getAllMessages();
-                io.emit("publishMessages", messages);
+                await MessageService.createMessage(data.user, data.message)
+                const messages = await MessageService.getAllMessages()
+                io.emit("publishMessages", messages)
             } catch (error) {
-                socket.emit("statusError", error.message);
+                socket.emit("statusError", error.message)
             }
         })
 
