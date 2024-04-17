@@ -3,12 +3,11 @@ import { productManagerDB } from '../dao/productManagerDB.js';
 import { cartManagerDB } from '../dao/cartManagerDB.js';
 
 const router = Router();
-const ProductService = new productManagerDB();
 const CartService = new cartManagerDB();
 
 router.get('/', async (req, res) => {
     try {
-        const carts = await cartManagerService.getAllCarts()
+        const carts = await CartService.getAllCarts()
         res.send({ carts })
     } catch (error) {
         console.error(error)
@@ -16,7 +15,6 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/:cid', async (req, res) => {
-
     try {
         const result = await CartService.getProductsFromCartByID(req.params.cid)
         res.send({
@@ -29,7 +27,7 @@ router.get('/:cid', async (req, res) => {
             message: error.message
         });
     }
-});
+})
 
 router.post('/', async (req, res) => {
 
@@ -52,7 +50,7 @@ router.post('/:cid/product/:pid', async (req, res) => {
     const productId = req.params.pid
     const quantity = req.body.quantity
     try {
-        await cartManagerService.addProductToCart(cartId, productId, quantity)
+        await CartService.addProductToCart(cartId, productId, quantity)
         res.send({ status: 'success', message: 'producto agregado al carrito' })
     } catch (error) {
         res.status(400).send({
@@ -66,7 +64,7 @@ router.put('/:cid', async (req, res) => {
     const cartId = req.params.cid
     const products = req.body.products
     try {
-      const cart = await cartManagerService.updateCart(cartId, products)
+      const cart = await CartService.updateCart(cartId, products)
       res.send({status:'success', message:'carrito editado', cart});
     } catch (error) {
         res.status(400).send({
@@ -81,7 +79,7 @@ router.put('/:cid', async (req, res) => {
     const productId = req.params.pid
     const quantity = req.body.quantity 
     try {
-      await cartManagerService.updateProductQuantity(cartId, productId, quantity)
+      await CartService.updateProductQuantity(cartId, productId, quantity)
       res.send({status:'success', message:'cantidad editada', cart});
     } catch (error) {
         res.status(400).send({
@@ -95,7 +93,7 @@ router.put('/:cid', async (req, res) => {
     const cartId = req.params.cid;
   
     try {
-      await cartManagerService.deleteAllProductsFromCart(cartId);
+      await CartService.deleteAllProductsFromCart(cartId);
       res.send("Carrito eliminado")
     } catch (error) {
       return res.status(400).send({status:'error', error:'ha ocurrido un error'})
@@ -106,7 +104,7 @@ router.put('/:cid', async (req, res) => {
     const cartId = req.params.cid;
     const productId = req.params.pid
     try {
-      await cartManagerService.deleteProductFromCart(cartId, productId)
+      await CartService.deleteProductFromCart(cartId, productId)
       res.send('Producto ' + productId + ' eliminado del carrito')
     } catch (error) {
         res.status(400).send({

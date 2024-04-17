@@ -8,17 +8,17 @@ const ProductService = new productManagerDB();
 
 router.get('/', async (req, res) => {
     try {
-        let page = parseInt (req.query.page);
+        let page = parseInt(req.query.page)
         if (!page) page = 1
         let limit = parseInt(req.query.limit) || 10
-        let sort = {price: 1}
+        let sort = { price: 1 }
+        let query = req.query
         const result = await ProductService.getAllProducts(limit, page, query, sort)
-        const baseURL = "http://localhost:8080/products"
-    res.render("./products",
-        {
+        const baseURL = "http://localhost:8080/api/products"
+        res.send({
             style: "index.css",
             status: 'success',
-            products: result.docs,
+            payload: result.docs,
             totalPages: result.totalPages,
             prevPage: result.prevPage,
             nextPage: result.nextPage,
@@ -27,24 +27,27 @@ router.get('/', async (req, res) => {
             hasNextPage: result.hasNextPage,
             prevLink: result.prevPage ? `${baseURL}?page=${result.prevPage}` : "",
             nextLink: result.nextPage ? `${baseURL}?page=${result.nextPage}` : "",
-          })
-        } catch (error) {
-            res.status(400).send({
-                status: 'error',
-                message: error.message
-            })
-        }
+            limit,
+            page,
+            query,
+            sort
+        })
+    } catch (error) {
+        res.status(400).send({
+            status: 'error',
+            message: error.message
+        })
+    }
 });
 
 router.get('/:pid', async (req, res) => {
-
     try {
         const result = await ProductService.getProductByID(req.params.pid);
         res.render("./product",
-        {
-            style: "index.css",
-            payload: result
-        });
+            {
+                style: "index.css",
+                payload: result
+            });
     } catch (error) {
         res.status(400).send({
             status: 'error',
@@ -54,14 +57,12 @@ router.get('/:pid', async (req, res) => {
 });
 
 router.post('/', uploader.array('thumbnails', 3), async (req, res) => {
-
     if (req.files) {
         req.body.thumbnails = [];
         req.files.forEach((file) => {
             req.body.thumbnails.push(file.filename);
         });
     }
-
     try {
         const result = await ProductService.createProduct(req.body);
         res.send({
