@@ -22,4 +22,4 @@ class messageManagerDB {
     }
 }
 
-export { messageManagerDB }
+export default messageManagerDB

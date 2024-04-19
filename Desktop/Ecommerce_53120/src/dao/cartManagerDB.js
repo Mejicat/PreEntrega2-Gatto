@@ -26,7 +26,7 @@ class cartManagerDB {
 
     async getAllCarts() {
         try {
-            return await cartModel.find().lean()
+            return await cartModel.find().populate('products.product').lean()
         } catch (error) {
             console.error(error.message)
             throw new Error("Error al buscar los carritos")
@@ -85,22 +85,7 @@ class cartManagerDB {
             console.error(error)
         }
     }
-    /*async addProductByID(cid, pid) {
-        try {
-            const cart = await cartModel.findOneAndUpdate(
-                { _id: cid },
-                { $addToSet: { products: { product: pid } } },
-                { new: true }
-            ).populate('products.product').lean()
 
-            if (!cart) throw new Error(`El carrito ${cid} no existe!`)
-
-            return cart;
-        } catch (error) {
-            console.error(error.message)
-            throw new Error('Error al agregar producto al carrito')
-        }
-    }*/
 
     async getProductsFromCartByID(cid) {
         try {

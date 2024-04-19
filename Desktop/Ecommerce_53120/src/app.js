@@ -4,7 +4,6 @@ import apiProductRouter from './routes/apiProductRouter.js';
 import apiCartRouter from './routes/apiCartRouter.js';
 import productsRouter from './routes/productsRouter.js';
 import cartsRouter from './routes/cartsRouter.js';
-import viewsRouter from './routes/viewsRouter.js';
 import __dirname from './utils/constantsUtil.js';
 import {Server} from 'socket.io';
 import websocket from './websocket.js';
@@ -27,11 +26,10 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.static('public'));
 
 //Routers
-app.use('/api/products', apiProductRouter);
-app.use('/api/carts', apiCartRouter);
-app.use('/products', productsRouter);
+app.use('/api/products', apiProductRouter)
+app.use('/api/carts', apiCartRouter)
+app.use('/products', productsRouter)
 app.use("/carts", cartsRouter)
-app.use('/chat', viewsRouter);
 
 const PORT = 8080;
 const httpServer = app.listen(PORT, () => {

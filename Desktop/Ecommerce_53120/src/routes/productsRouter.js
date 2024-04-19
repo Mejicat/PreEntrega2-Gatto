@@ -26,10 +26,11 @@ router.get('/', async (req, res) => {
         let query = req.query
         const result = await ProductService.getAllProducts(limit, page, query, sort)
         const baseURL = "http://localhost:8080/products"
-        res.render("./products",
+        res.render("products",
             {
                 style: "index.css",
-                status: 'success',
+                layout: "products",
+                status: "success",
                 products: result.docs,
                 totalPages: result.totalPages,
                 prevPage: result.prevPage,
@@ -56,7 +57,7 @@ router.get('/:pid', async (req, res) => {
 
     try {
         const result = await ProductService.getProductByID(req.params.pid);
-        res.render("./product",
+        res.render("product",
             {
                 style: "index.css",
                 payload: result
