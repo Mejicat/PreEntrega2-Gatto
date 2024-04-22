@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { productManagerDB } from '../dao/productManagerDB.js';
 import { uploader } from '../utils/multerUtil.js';
+import { auth } from "../middlewares/auth.js";
 
 const router = Router();
 
 const ProductService = new productManagerDB();
 
-router.get('/realtimeproducts', async (req, res) => {
+router.get('/realtimeproducts', auth, async (req, res) => {
     res.render(
         'realTimeProducts',
         {
@@ -15,9 +16,9 @@ router.get('/realtimeproducts', async (req, res) => {
             products: await ProductService.getAllProducts()
         }
     )
-});
+})
 
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
     try {
         let page = parseInt(req.query.page)
         if (!page) page = 1
@@ -53,22 +54,23 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.get('/:pid', async (req, res) => {
+router.get('/:pid', auth, async (req, res) => {
 
     try {
-        const result = await ProductService.getProductByID(req.params.pid);
+        const result = await ProductService.getProductByID(req.params.pid)
         res.render("product",
             {
+                layout: "product",
                 style: "index.css",
                 payload: result
-            });
+            })
     } catch (error) {
         res.status(400).send({
             status: 'error',
             message: error.message
-        });
+        })
     }
-});
+})
 
 router.post('/', uploader.array('thumbnails', 3), async (req, res) => {
 

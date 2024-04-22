@@ -1,17 +1,21 @@
 import { Router } from 'express';
 import { cartManagerDB } from '../dao/cartManagerDB.js';
+import { auth } from "../middlewares/auth.js";
 
 const router = Router();
 
 const CartService = new cartManagerDB()
 
-router.get('/:cid', async (req, res) => {
+router.get('/:cid', auth, async (req, res) => {
     try {
         const result = await CartService.getProductsFromCartByID(req.params.cid)
-        res.send({
-            status: 'success',
-            payload: result
-        });
+        res.render(
+            "cart",
+          {
+            layout: 'default',
+            cartId: result,
+            products: cart.products
+          })
     } catch (error) {
         res.status(400).send({
             status: 'error',

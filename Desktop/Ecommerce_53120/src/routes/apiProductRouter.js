@@ -1,10 +1,10 @@
-import { Router } from 'express';
-import { productManagerDB } from '../dao/productManagerDB.js';
-import { uploader } from '../utils/multerUtil.js';
+import { Router } from 'express'
+import { productManagerDB } from '../dao/productManagerDB.js'
+import { uploader } from '../utils/multerUtil.js'
 
-const router = Router();
+const router = Router()
 
-const ProductService = new productManagerDB();
+const ProductService = new productManagerDB()
 
 router.get('/', async (req, res) => {
     try {
@@ -42,68 +42,65 @@ router.get('/', async (req, res) => {
 
 router.get('/:pid', async (req, res) => {
     try {
-        const result = await ProductService.getProductByID(req.params.pid);
-        res.render("./product",
+        const result = await ProductService.getProductByID(req.params.pid)
+        res.render("product",
             {
                 style: "index.css",
                 payload: result
-            });
+            })
     } catch (error) {
         res.status(400).send({
             status: 'error',
             message: error.message
-        });
+        })
     }
-});
+})
 
 router.post('/', uploader.array('thumbnails', 3), async (req, res) => {
     if (req.files) {
         req.body.thumbnails = [];
         req.files.forEach((file) => {
             req.body.thumbnails.push(file.filename);
-        });
+        })
     }
     try {
-        const result = await ProductService.createProduct(req.body);
+        const result = await ProductService.createProduct(req.body)
         res.send({
             status: 'success',
             payload: result
-        });
+        })
     } catch (error) {
         res.status(400).send({
             status: 'error',
             message: error.message
-        });
+        })
     }
-});
+})
 
 router.put('/:pid', uploader.array('thumbnails', 3), async (req, res) => { //Añado hasta 3 fotos para el producto
-
     if (req.files) {
-        req.body.thumbnails = [];
+        req.body.thumbnails = []
         req.files.forEach((file) => {
-            req.body.thumbnails.push(file.filename);
+            req.body.thumbnails.push(file.filename)
         });
     }
-
     try {
-        const result = await ProductService.updateProduct(req.params.pid, req.body);
+        const result = await ProductService.updateProduct(req.params.pid, req.body)
         res.send({
             status: 'success',
             payload: result
-        });
+        })
     } catch (error) {
         res.status(400).send({
             status: 'error',
             message: error.message
-        });
+        })
     }
-});
+})
 
 router.delete('/:pid', async (req, res) => {
-
     try {
-        const result = await ProductService.deleteProduct(req.params.pid);
+        const result = await ProductService.deleteProduct(req.params.pid)
         res.send({
             status: 'success',
             payload: result
@@ -116,4 +113,4 @@ router.delete('/:pid', async (req, res) => {
     }
 });
 
-export default router;
+export default router

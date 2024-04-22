@@ -7,18 +7,21 @@ const CartService = new cartManagerDB();
 router.post('/', async (req, res) => {
 
     try {
-        const result = await CartService.createCart();
+        const userId = req.session.user._id
+        const result = await CartService.createCart(userId)
         res.send({
-            status: 'success',
-            payload: result
-        });
+            status: "success",
+            message: "carrito creado",
+            payload: result,
+            cart
+        })
     } catch (error) {
         res.status(400).send({
             status: 'error',
             message: error.message
-        });
+        })
     }
-});
+})
 
 router.post('/:cid/product/:pid', async (req, res) => {
     const cartId = req.params.cid
@@ -26,7 +29,10 @@ router.post('/:cid/product/:pid', async (req, res) => {
     const quantity = req.body.quantity
     try {
         await CartService.addProductToCart(cartId, productId, quantity)
-        res.send({ status: 'success', message: 'producto agregado al carrito' })
+        res.send({ 
+            status: 'success', 
+            message: 'producto agregado al carrito'
+         })
     } catch (error) {
         res.status(400).send({
             status: 'error',
@@ -49,7 +55,8 @@ router.get('/:cid', async (req, res) => {
         const result = await CartService.getProductsFromCartByID(req.params.cid)
         res.send({
             status: 'success',
-            payload: result
+            payload: result,
+            cart
         });
     } catch (error) {
         res.status(400).send({
@@ -59,14 +66,16 @@ router.get('/:cid', async (req, res) => {
     }
 })
 
-
-
 router.put('/:cid', async (req, res) => {
     const cartId = req.params.cid
     const products = req.body.products
     try {
       const cart = await CartService.updateCart(cartId, products)
-      res.send({status:'success', message:'carrito editado', cart});
+      res.send({
+        status:'success', 
+        message:'carrito editado',
+        cart
+    })
     } catch (error) {
         res.status(400).send({
             status: 'error',
@@ -81,7 +90,10 @@ router.put('/:cid', async (req, res) => {
     const quantity = req.body.quantity 
     try {
       await CartService.updateProductQuantity(cartId, productId, quantity)
-      res.send({status:'success', message:'cantidad editada', cart});
+      res.send({
+        status:'success', 
+        message:'cantidad editada', 
+        cart});
     } catch (error) {
         res.status(400).send({
             status: 'error',
@@ -92,12 +104,14 @@ router.put('/:cid', async (req, res) => {
   
   router.delete("/:cid", async (req, res) => {
     const cartId = req.params.cid;
-  
     try {
       await CartService.deleteAllProductsFromCart(cartId);
       res.send("Carrito eliminado")
     } catch (error) {
-      return res.status(400).send({status:'error', error:'ha ocurrido un error'})
+      return res.status(400).send({
+        status:'error', 
+        error:'ha ocurrido un error'
+    })
     }
   })
   
