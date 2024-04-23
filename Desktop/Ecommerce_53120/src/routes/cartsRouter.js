@@ -12,9 +12,9 @@ router.get('/:cid', auth, async (req, res) => {
         res.render(
             "cart",
           {
-            layout: 'default',
-            cartId: result,
-            products: cart.products
+            layout: 'cart',
+            cartId: req.params.cid,
+            products: result.products
           })
     } catch (error) {
         res.status(400).send({

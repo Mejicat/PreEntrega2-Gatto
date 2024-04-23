@@ -60,13 +60,14 @@ app.get('/', async (req, res) => {
     }
   })
 
-//Routers
+//Router respuesta tradicional / endpoint
 app.use('/api/products', apiProductRouter)
-
 app.use('/api/carts', apiCartRouter)
+app.use('/api/sessions', usersRouter)
+
+//Router vistas de navegación
 app.use('/products', productsRouter)
 app.use("/carts", cartsRouter)
-app.use('/api/sessions', usersRouter);
 app.use('/session', viewsRouter) // por el momento acá guardo el Chat también
 
 const PORT = 8080;

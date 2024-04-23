@@ -7,13 +7,25 @@ const router = Router()
 const ProductService = new productManagerDB()
 
 router.get('/', async (req, res) => {
+    let { limit, page, sort, category, status } = req.query
+    let sortOptions
     try {
-        let page = parseInt(req.query.page)
-        if (!page) page = 1
-        let limit = parseInt(req.query.limit) || 10
-        let sort = { price: 1 }
-        let query = req.query
-        const result = await ProductService.getAllProducts(limit, page, query, sort)
+        if (sort == "asc") {
+            sortOptions = { price: 1 }
+        } else if (sort == "desc") {
+            sortOptions = { price: -1 }
+        } else {
+            sortOptions = {}
+        }
+        let filter
+        if (category) {
+            filter = { category: category }
+        } else if (status) {
+            filter = { status: status }
+        } else {
+            filter = {}
+        }
+        const result = await ProductService.getAllProducts(filter, { limit: limit ? limit : 10, page: page ? page : 1, sort: sortOptions })
         const baseURL = "http://localhost:8080/api/products"
         res.send({
             style: "index.css",
@@ -22,15 +34,11 @@ router.get('/', async (req, res) => {
             totalPages: result.totalPages,
             prevPage: result.prevPage,
             nextPage: result.nextPage,
-            page: page, //utilizo la variable page que yo declaré, para contemplar el caso en que no exista esa page
+            page: result.page, 
             hasPrevPage: result.hasPrevPage,
             hasNextPage: result.hasNextPage,
             prevLink: result.prevPage ? `${baseURL}?page=${result.prevPage}` : "",
-            nextLink: result.nextPage ? `${baseURL}?page=${result.nextPage}` : "",
-            limit,
-            page,
-            query,
-            sort
+            nextLink: result.nextPage ? `${baseURL}?page=${result.nextPage}` : ""
         })
     } catch (error) {
         res.status(400).send({
@@ -43,11 +51,7 @@ router.get('/', async (req, res) => {
 router.get('/:pid', async (req, res) => {
     try {
         const result = await ProductService.getProductByID(req.params.pid)
-        res.render("product",
-            {
-                style: "index.css",
-                payload: result
-            })
+        res.send({product})
     } catch (error) {
         res.status(400).send({
             status: 'error',
