@@ -71,10 +71,11 @@ router.put('/:cid', async (req, res) => {
     const products = req.body.products
     try {
       const cart = await CartService.updateCart(cartId, products)
+      const updatedCart = await CartService.getCartById(cartId)
       res.send({
         status:'success', 
         message:'carrito editado',
-        cart
+        cart: updatedCart // envío el carrito actualizado en la respuesta
     })
     } catch (error) {
         res.status(400).send({

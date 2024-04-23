@@ -29,7 +29,7 @@ router.get('/login', async (req, res) => {
     res.render(
       "login",
       {
-        layout: 'login',
+        //layout: 'login',
         loginFailed: req.session.failLogin
       }
     )
@@ -42,7 +42,7 @@ router.get('/login', async (req, res) => {
     res.render(
       'register',
       {
-        layout: 'register',
+       // layout: 'register',
       }
     )
   })

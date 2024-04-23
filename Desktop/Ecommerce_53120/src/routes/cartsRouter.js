@@ -12,7 +12,7 @@ router.get('/:cid', auth, async (req, res) => {
         res.render(
             "cart",
           {
-            layout: 'cart',
+            //layout: 'cart',
             cartId: req.params.cid,
             products: result.products
           })
