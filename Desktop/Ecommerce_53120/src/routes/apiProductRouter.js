@@ -51,7 +51,7 @@ router.get('/', async (req, res) => {
 router.get('/:pid', async (req, res) => {
     try {
         const result = await ProductService.getProductByID(req.params.pid)
-        res.send({product})
+        res.send({product: result})
     } catch (error) {
         res.status(400).send({
             status: 'error',
