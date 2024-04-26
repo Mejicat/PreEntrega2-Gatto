@@ -14,6 +14,7 @@ router.get('/users', async (req, res) => {
       res.send({users: result})
     } catch (error) {
       console.error(error)
+      res.status(500).send("Internal Server Error")
     }
   })
 
@@ -26,6 +27,7 @@ router.post("/register", async (req, res) => {
       await userManagerService.updateUser(response._id, cart._id)
       res.redirect('/')
     } catch (error) {
+      console.error(error)
       res.redirect('/register')
     }
   })

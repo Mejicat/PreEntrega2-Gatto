@@ -66,9 +66,9 @@ app.use('/api/carts', apiCartRouter)
 app.use('/api/sessions', usersRouter)
 
 //Router vistas de navegación
-app.use('/products', productsRouter)
-app.use("/carts", cartsRouter)
-app.use('/session', viewsRouter) // por el momento acá guardo el Chat también
+app.use('/views/products', productsRouter)
+app.use("/views/carts", cartsRouter)
+app.use('/views/sessions', viewsRouter) // por el momento acá guardo el Chat también
 
 const PORT = 8080;
 const httpServer = app.listen(PORT, () => {
