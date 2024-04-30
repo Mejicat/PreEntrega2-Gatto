@@ -72,9 +72,9 @@ app.use('/views/sessions', viewsRouter) // por el momento acá guardo el Chat ta
 
 const PORT = 8080;
 const httpServer = app.listen(PORT, () => {
-    console.log(`Start server in PORT ${PORT}`);
+    console.log(`Start server in PORT ${PORT}`)
 });
 
-const io = new Server(httpServer);
+const io = new Server(httpServer)
 
-websocket(io);
+websocket(io)

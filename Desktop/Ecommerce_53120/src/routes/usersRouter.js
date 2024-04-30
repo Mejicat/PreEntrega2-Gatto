@@ -1,65 +1,75 @@
-import {Router} from 'express'
-import userModel from '../dao/models/userModel.js'
+import { Router } from 'express'
 import userManagerDB from "../dao/userManagerDB.js"
-import {cartManagerDB} from "../dao/cartManagerDB.js"
+import passport from "passport"
 
 const router = Router()
 
 const userManagerService = new userManagerDB()
-const cartManagerService = new cartManagerDB()
 
 router.get('/users', async (req, res) => {
-    try {
-      const result = await userManagerService.getUsers()
-      res.send({users: result})
-    } catch (error) {
-      console.error(error)
-      res.status(500).send("Internal Server Error")
-    }
+  try {
+    const result = await userManagerService.getUsers()
+    res.send({ users: result })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send("Internal Server Error")
+  }
+})
+
+router.post('/register',
+  passport.authenticate('register', { failureRedirect: '/api/sessions/failRegister' }),
+  async (req, res) => {
+    res.redirect('/login')
+  }
+);
+
+router.get("/failRegister", (req, res) => {
+  res.status(400).send({
+    status: "error",
+    message: "Falla en el Registro"
   })
+})
 
-router.post("/register", async (req, res) => {
-    const user = req.body
-    try {
-      const response = await userManagerService.registerUser(user)
-      const cart = await cartManagerService.addCart(response._id)
-      //Asocio el carrito al usuario
-      await userManagerService.updateUser(response._id, cart._id)
-      res.redirect('/')
-    } catch (error) {
-      console.error(error)
-      res.redirect('/register')
+
+router.post(
+  '/login',
+  passport.authenticate('login', { failureRedirect: '/api/sessions/failLogin' }),
+  async (req, res) => {
+    req.session.user = {
+      _id: req.user._id,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      email: req.user.email,
+      age: req.user.age,
+      role: req.user.role 
     }
+    res.redirect('/')
+  }
+)
+
+router.get("/failLogin", (req, res) => {
+  res.status(400).send({
+      status: "error",
+      message: "Falla en el Login"
   })
+})
 
-router.post("/login", async (req, res) => {
-    try {
-        req.session.failLogin = false
-        const result = await userModel.findOne({email: req.body.email}); //busco al usuario por su mail
-        if (!result) {
-            req.session.failLogin = true
-            return res.redirect("/login")
-        }
+router.get("/github", passport.authenticate('github', {scope: ['user:email']}), (req, res) => {
+  res.send({
+      status: 'success',
+      message: 'Acceso exitoso'
+  })
+})
 
-        if (req.body.password !== result.password) {
-            req.session.failLogin = true
-            return res.redirect("/login")
-        }
-
-        delete result.password
-        req.session.user = result //guardo todos sus datos, excepto la contraseña
-
-        return res.redirect("/")
-    } catch (e) {
-        req.session.failLogin = true
-        return res.redirect("/login")
-    }
+router.get("/githubcallback", passport.authenticate('github', {failureRedirect: '/login'}), (req, res) => {
+  req.session.user = req.user
+  res.redirect('/')
 })
 
 router.post("/logout", (req, res) => {
-    req.session.destroy(error => {
-        res.redirect('/login')
-    })
+  req.session.destroy(error => {
+    res.redirect('/login')
   })
+})
 
 export default router;

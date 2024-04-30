@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import { cartManagerDB } from '../dao/cartManagerDB.js';
-import { auth } from "../middlewares/auth.js";
+import { Router } from 'express'
+import { cartManagerDB } from '../dao/cartManagerDB.js'
+import { auth } from "../middlewares/auth.js"
 
-const router = Router();
+const router = Router()
 
 const CartService = new cartManagerDB()
 
