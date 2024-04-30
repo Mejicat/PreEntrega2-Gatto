@@ -12,8 +12,12 @@ import MongoStore from 'connect-mongo';
 import viewsRouter from './routes/viewsRouter.js';
 import usersRouter from './routes/usersRouter.js';
 import session from 'express-session';
+import initializatePassport from './config/passportConfig.js';
+import passport from 'passport';
+import dotenv from 'dotenv';
 
-const app = express();
+dotenv.config()
+const app = express()
 
 //MongoDB connect
 const uri = "mongodb+srv://lucasgatto:tDM2EhNHbMihAdV4@cluster0.1npyj6s.mongodb.net/ecommerce?retryWrites=true&w=majority&appName=Cluster0";
@@ -42,6 +46,10 @@ app.use(session(
         saveUninitialized: true
     }
 ))
+
+initializatePassport()
+app.use(passport.initialize())
+app.use(passport.session())
 
 // Linkeo al usuario con su carrito
 app.get('/', async (req, res) => {
