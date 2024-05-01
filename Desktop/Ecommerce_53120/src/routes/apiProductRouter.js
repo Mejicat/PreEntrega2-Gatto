@@ -41,12 +41,13 @@ router.get('/', async (req, res) => {
             nextLink: result.nextPage ? `${baseURL}?page=${result.nextPage}` : ""
         })
     } catch (error) {
-        res.status(400).send({
+        console.error("Error al obtener productos:", error.message)
+        res.status(500).send({
             status: 'error',
-            message: error.message
+            message: 'Error al obtener productos. Prueba más tarde.'
         })
     }
-});
+})
 
 router.get('/:pid', async (req, res) => {
     try {

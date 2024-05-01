@@ -16,11 +16,12 @@ router.get('/:cid', auth, async (req, res) => {
             cartId: req.params.cid,
             products: result.products
           })
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        })
+        } catch (error) {
+            console.error("Error al obtener productos del carrito:", error.message)
+            res.status(500).send({
+                status: 'error',
+                message: 'Error al obtener productos del carrito. Prueba más tarde.'
+            })
     }
 })
 

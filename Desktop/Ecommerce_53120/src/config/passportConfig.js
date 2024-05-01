@@ -18,11 +18,6 @@ const GHCLIENT_SECRET = d71ec3bdc55c0dee273e2ad099f67f87ab52d117;
 
 dotenv.config() //Preciso definir variables de entorno para la estrategia de autenticación de GitHub. Agrego en packege.json en SCRIPTS - START
 
-
-console.log(process.env.GHCLIENT_ID)
-console.log(process.env.GHCLIENT_SECRET)
-
-
 const userManagerService = new userManagerDB()
 const cartManagerService = new cartManagerDB()
 

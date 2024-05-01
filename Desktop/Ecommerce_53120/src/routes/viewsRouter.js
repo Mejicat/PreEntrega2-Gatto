@@ -10,6 +10,9 @@ const messageService = new messageManagerDB()
 
 //Rutas públicas
 router.get('/login', logged, async (req, res) => {
+  if (req.session.user) {
+    return res.redirect('/views/carts') // redirige si ya hay una sesión activa
+  }
   res.render(
     "login",
     {
@@ -19,9 +22,10 @@ router.get('/login', logged, async (req, res) => {
 })
   
 router.get('/register', logged, async (req, res) => {
-  res.render(
-    'register',{}
-  )
+  if (req.session.user) {
+    return res.redirect('/views/carts') // redirige si ya hay una sesión activa
+  }
+  res.render('register', {})
 })
 
 router.get("/chat", async (req, res) => {

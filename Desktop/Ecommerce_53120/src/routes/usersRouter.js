@@ -43,15 +43,12 @@ router.post(
       age: req.user.age,
       role: req.user.role 
     }
-    res.redirect('/')
+    res.redirect('/views/carts')
   }
 )
 
 router.get("/failLogin", (req, res) => {
-  res.status(400).send({
-      status: "error",
-      message: "Falla en el Login"
-  })
+  res.redirect("/views/sessions/login")
 })
 
 router.get("/github", passport.authenticate('github', {scope: ['user:email']}), (req, res) => {
@@ -63,7 +60,7 @@ router.get("/github", passport.authenticate('github', {scope: ['user:email']}), 
 
 router.get("/githubcallback", passport.authenticate('github', {failureRedirect: '/login'}), (req, res) => {
   req.session.user = req.user
-  res.redirect('/')
+  res.redirect('/views/carts')
 })
 
 router.post("/logout", (req, res) => {

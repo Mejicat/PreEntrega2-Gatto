@@ -16,9 +16,10 @@ router.post('/', async (req, res) => {
             cart
         })
     } catch (error) {
-        res.status(400).send({
+        console.error("Error al crear un carrito:", error.message)
+        res.status(500).send({
             status: 'error',
-            message: error.message
+            message: 'Error al crear un carrito. Prueba nuevo más tarde.'
         })
     }
 })
