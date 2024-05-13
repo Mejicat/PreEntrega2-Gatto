@@ -1,20 +1,23 @@
 import express from 'express';
+import websocket from './websocket.js';
+import mongoose from 'mongoose';
+import MongoStore from 'connect-mongo';
+import session from 'express-session';
+import dotenv from 'dotenv';
 import handlebars from 'express-handlebars';
+import {Server} from 'socket.io';
+import passport from 'passport';
+import cookieParser from 'cookie-parser';
+
+import __dirname from './utils/constantsUtil.js';
+import initializatePassport from './config/passportConfig.js';
 import apiProductRouter from './routes/apiProductRouter.js';
 import apiCartRouter from './routes/apiCartRouter.js';
 import productsRouter from './routes/productsRouter.js';
 import cartsRouter from './routes/cartsRouter.js';
-import __dirname from './utils/constantsUtil.js';
-import {Server} from 'socket.io';
-import websocket from './websocket.js';
-import mongoose from 'mongoose';
-import MongoStore from 'connect-mongo';
 import viewsRouter from './routes/viewsRouter.js';
 import usersRouter from './routes/usersRouter.js';
-import session from 'express-session';
-import initializatePassport from './config/passportConfig.js';
-import passport from 'passport';
-import dotenv from 'dotenv';
+
 
 dotenv.config()
 const app = express()
@@ -32,6 +35,8 @@ app.set('view engine', 'handlebars')
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 app.use(express.static('public'))
+app.use(cookieParser())
+
 //Session Middlewares
 app.use(session(
     {
@@ -47,6 +52,7 @@ app.use(session(
     }
 ))
 
+// Passport
 initializatePassport()
 app.use(passport.initialize())
 app.use(passport.session())

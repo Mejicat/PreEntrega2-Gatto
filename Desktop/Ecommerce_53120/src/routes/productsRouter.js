@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { productManagerDB } from '../dao/productManagerDB.js'
 import { uploader } from '../utils/multerUtil.js'
 import { auth } from "../middlewares/auth.js"
+import  isAdmin  from "../middlewares/isAdmin.js"
 
 const router = Router()
 
@@ -42,7 +43,6 @@ router.get('/', auth, async (req, res) => {
         res.render("products",
             {
                 style: "index.css",
-                //layout: "products",
                 status: "success",
                 products: result.docs,
                 totalPages: result.totalPages,
@@ -68,7 +68,6 @@ router.get('/:pid', auth, async (req, res) => {
         const result = await ProductService.getProductByID(req.params.pid)
         res.render("product",
             {
-                //layout: "product",
                 style: "index.css",
                 payload: result
             })
@@ -80,7 +79,7 @@ router.get('/:pid', auth, async (req, res) => {
     }
 })
 
-router.post('/', uploader.array('thumbnails', 3), async (req, res) => {
+router.post('/', uploader.array('thumbnails', 3),  auth, isAdmin, async (req, res) => {
 
     if (req.files) {
         req.body.thumbnails = [];

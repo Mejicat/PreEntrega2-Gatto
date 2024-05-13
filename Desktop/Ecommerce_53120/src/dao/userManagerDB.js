@@ -1,29 +1,67 @@
+import jwt from "jsonwebtoken"
+
 import { isValidPassword } from "../utils/bcrypt.js"
 import userModel from "./models/userModel.js"
 
 export default class userManagerDB {
-  async getUsers() {
+  async getAllUsers() {
     try {
-      const result = await userModel.find({}).populate('cart').populate('cart.products.product')
-      return result
+      return await userModel.find({}).populate('cart').populate('cart.products.product')
     } catch (error) {
-      console.error("Error al obtener usuarios:", error)
+      console.error("Error al obtener usuario:", error)
+      throw new Error("Error al consultar usuarios")
+    }
+  }
+
+  async getUser(uid) {
+    try {
+      return await userModel.find({ _id: uid }).populate('cart').populate('cart.products.product')
+    } catch (error) {
+      console.error("Error al obtener usuario:", error)
+      throw new Error("Usuario inexistente")
+    }
+  }
+
+
+  async registerUser(user) {
+    const { first_name, last_name, email, age, password } = user
+
+    if (!first_name || !last_name || !email || !age || !password) {
+      throw new Error("Error al registrar el usuario")
+    }
+
+    try {
+      const newUser = await userModel.create({ first_name, last_name, email, age, password })
+      if (user.email == "adminCoder@coder.com" && isValidPassword(user, 'adminCod3r123')) {
+        newUser.role = "admin"
+        await newUser.save()
+      }
+      return "Usuario registrado correctamente"
+    } catch (error) {
+      console.error("Error al registrar usuario:", error)
       throw error
     }
   }
 
-  async registerUser(user) {
+  async login(email, password) {
+
+    if (!email || !password) {
+      throw new Error("Datos de acceso inválidos. Verificar e reintentar nuevamente.")
+    }
+
     try {
-      if (user.email == "adminCoder@coder.com" && isValidPassword(user, 'adminCod3r123')) {
-        const result = await userModel.create(user)
-        result.role = "admin"
-        result.save()
-        return result
+      const user = await userModel.findOne({ email }).lean()
+      if (!user) throw new Error("Credenciales inválidas")
+      if (isValidPassword(user, password)) {
+        delete user.password
+        return jwt.sign(user, "coderSecret", {expiresIn: "1h"})
       }
-      const result = await userModel.create(user) //si el usuario no es el admin, lo guardo en la DB
-      return result
-    } catch (error) {
-      console.error("Error al registrar usuario:", error)
+
+      throw new Error("Credenciales inválidas")
+    }
+
+    catch (error) {
+      console.error("Error al intentar hacer login:", error)
       throw error
     }
   }

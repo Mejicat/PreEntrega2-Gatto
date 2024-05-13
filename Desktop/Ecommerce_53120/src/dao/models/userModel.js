@@ -1,5 +1,6 @@
 import mongoose from "mongoose"
 import mongoosePaginate from "mongoose-paginate-v2"
+import { createHash } from "../../utils/bcrypt.js"
 
 const userCollection = "users"
 
@@ -27,20 +28,32 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
+        hash: true,
         minLength: 5,
         require: true
     },
     role: {
         type: String,
-        default: 'usuario' //rol por default definido en la consigna
+        default: 'user'
     },
     cart: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'carts'
+        type: [
+            {
+                cart: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: 'carts'
+                }
+            }
+        ],
+        default: []
     }
 })
 
 userSchema.plugin(mongoosePaginate)
+
+userSchema.pre("save", function(){
+    this.password = createHash(this.password)
+})
 
 const userModel = mongoose.model(userCollection, userSchema)
 

@@ -1,11 +1,14 @@
 import passport from "passport"
+import jwt, { ExtractJwt } from "passport-jwt"
 import GitHubStrategy from 'passport-github2'
 import local from 'passport-local'
+import dotenv from 'dotenv'
+
 import userModel from "../dao/models/userModel.js"
-import { createHash, isValidPassword } from "../utils/bcrypt.js"
+import { isValidPassword } from "../utils/bcrypt.js"
 import userManagerDB from "../dao/userManagerDB.js"
 import { cartManagerDB } from "../dao/cartManagerDB.js"
-import dotenv from 'dotenv';
+
 
 /*
 App ID: 886836
@@ -21,57 +24,47 @@ dotenv.config() //Preciso definir variables de entorno para la estrategia de aut
 const userManagerService = new userManagerDB()
 const cartManagerService = new cartManagerDB()
 
-const localStrategy = local.Strategy
+const JWTStrategy = jwt.Strategy
+
 const initializatePassport = () => {
 
   const GHCLIENT_ID = process.env.GHCLIENT_ID
   const GHCLIENT_SECRET = process.env.GHCLIENT_SECRET
 
-  passport.use('register', new localStrategy(
-    {
-      passReqToCallback: true,
-      usernameField: 'email'
-    },
-    async (req, username, password, done) => {
-      const { firstName, lastName, email, age } = req.body;
-
-      try {
-        const user = await userManagerService.findUserEmail(username);
-        if (user) {
-          console.log('El usuario ya existe')
-          return done(null, false)
-        }
-
-        const newUser = {
-          firstName,
-          lastName,
-          email,
-          age,
-          password: createHash(password)
-        }
-
-        const registeredUser = await userManagerService.registerUser(newUser)
-        const cart = await cartManagerService.addCart(registeredUser._id)
-        const result = await userManagerService.updateUser(registeredUser._id, cart._id);
-
-        return done(null, result)
-      } catch (error) {
-        console.log(error.message)
-        return done(error.message)
-      }
+  const cookieExtractor = (req) => {
+    let token = null
+    if (req && req.cookies) {
+      token = req.cookies.auth ?? null
     }
-  ))
+    return token
+  }
 
-  passport.use('login', new localStrategy(
+  passport.use(
+    'jwt',
+    new JWTStrategy(
+      {
+        jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
+        secretOrKey: "coderSecret"
+      },
+      async (jwt_payload, done) => {
+        try {
+          return done(null, jwt_payload)
+        } catch (error) {
+          return done(error)
+        }
+      }
+    ))
+
+  /*passport.use('login', new JWTStrategy(
     {
       usernameField: 'email'
     },
     async (username, password, done) => {
       try {
-        const user = await userManagerService.findUserEmail(username);
+        const user = await userManagerService.findUserEmail(username)
         if (!user) {
-          console.log('User does not exist')
-          return done('User does not exist')
+          console.log('El usuario no existe')
+          return done('El usuario no existe')
         }
 
         if (!isValidPassword(user, password)) {
@@ -84,7 +77,7 @@ const initializatePassport = () => {
         return done(error.message)
       }
     }
-  ))
+  ))*/
 
   passport.use(
     'github',
@@ -104,13 +97,13 @@ const initializatePassport = () => {
             }
             const registeredUser = await userManagerService.registerUser(newUser)
             const cart = await cartManagerService.addCart(registeredUser._id)
-            const result = await userManagerService.updateUser(registeredUser._id, cart._id);
-            done(null, result);
+            const result = await userManagerService.updateUser(registeredUser._id, cart._id)
+            done(null, result)
           } else {
-            done(null, user);
+            done(null, user)
           }
         } catch (error) {
-          return done(error);
+          return done(error)
         }
       }
     ))

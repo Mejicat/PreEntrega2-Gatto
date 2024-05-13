@@ -16,7 +16,7 @@ router.get('/login', logged, async (req, res) => {
   res.render(
     "login",
     {
-      loginFailed: req.session.failLogin
+      loginFailed: req.session.failLogin ?? false
     }
   )
 })
@@ -25,7 +25,11 @@ router.get('/register', logged, async (req, res) => {
   if (req.session.user) {
     return res.redirect('/views/carts') // redirige si ya hay una sesión activa
   }
-  res.render('register', {})
+  res.render(
+    'register', 
+    {
+      registerFailed: req.session.failRegister ?? false
+    })
 })
 
 router.get("/chat", async (req, res) => {

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import userManagerDB from "../dao/userManagerDB.js"
 import passport from "passport"
+import { auth } from '../middlewares/auth.js'
 
 const router = Router()
 
@@ -16,12 +17,57 @@ router.get('/users', async (req, res) => {
   }
 })
 
+router.get('/current', passport.authenticate("jwt", { session: false }), async (req, res) => {
+  if (req.session.user) {
+    res.status(200).send({
+      status: 'success',
+      user: req.session.user
+    })
+  } else {
+    res.status(400).send({
+      status: 'error',
+      message: "Usuario no encontrado"
+    })
+  }
+})
+
+router.get('/:uid'), passport.authenticate("jwt", { session: false }), (req, res, next) => {
+
+  if (req.user.role === "admin") return next()
+  res.status(403).send({
+    status: "error",
+    message: "Unauthorized"
+  })
+}, async (req, res) => {
+  try {
+    const result = await userManagerService.getUser(req.params.uid)
+    res.send({
+      status: "success",
+      payload: result
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).send("Internal Server Error")
+  }
+}
+
 router.post('/register',
   passport.authenticate('register', { failureRedirect: '/api/sessions/failRegister' }),
   async (req, res) => {
-    res.redirect('/login')
-  }
-);
+    try {
+      const result = await userManagerService.registerUser(req.body)
+      res.send({
+        status: "success",
+        payload: result
+      })
+    } catch (error) {
+      console.error("Error al registrar usuario:", error);
+      res.status(500).send({
+        status: "error",
+        message: "Error al registrar usuario. Por favor, intenta de nuevo más tarde."
+      })
+    }
+  })
 
 router.get("/failRegister", (req, res) => {
   res.status(400).send({
@@ -30,43 +76,44 @@ router.get("/failRegister", (req, res) => {
   })
 })
 
-
-router.post(
-  '/login',
-  passport.authenticate('login', { failureRedirect: '/api/sessions/failLogin' }),
+router.post('/login', passport.authenticate('login', { failureRedirect: '/api/sessions/failLogin' }),
   async (req, res) => {
-    req.session.user = {
-      _id: req.user._id,
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
-      email: req.user.email,
-      age: req.user.age,
-      role: req.user.role 
+    try {
+      const { email, password } = req.body
+      const token = await userManagerService.login(email, password)
+      res.cookie("auth", token, { maxAge: 60 * 60 * 1000 }).send(
+        {
+          status: "success",
+          token
+        }
+      )
+    } catch (error) {
+      res.status(400).send({
+        status: error,
+        message: message.error
+      })
     }
-    res.redirect('/views/carts')
-  }
-)
+  })
 
 router.get("/failLogin", (req, res) => {
   res.redirect("/views/sessions/login")
 })
 
-router.get("/github", passport.authenticate('github', {scope: ['user:email']}), (req, res) => {
+router.get("/github", passport.authenticate('github', { scope: ['user:email'] }), (req, res) => {
   res.send({
-      status: 'success',
-      message: 'Acceso exitoso'
+    status: 'success',
+    message: 'Acceso exitoso'
   })
 })
 
-router.get("/githubcallback", passport.authenticate('github', {failureRedirect: '/login'}), (req, res) => {
+router.get("/githubcallback", passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
   req.session.user = req.user
   res.redirect('/views/carts')
 })
 
-router.post("/logout", (req, res) => {
-  req.session.destroy(error => {
-    res.redirect('/login')
-  })
+router.get("/logout", async (req, res) => {
+  req.clearCookie ("auth")
+  res.redirect("/login")
 })
 
-export default router;
+export default router
