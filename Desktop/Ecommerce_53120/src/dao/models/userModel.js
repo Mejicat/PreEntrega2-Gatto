@@ -8,29 +8,29 @@ const userSchema = new mongoose.Schema({
     first_name: {
         type: String,
         minLength: 3,
-        require: true
+        required: true
     },
     last_name: {
         type: String,
         minLength: 3,
-        require: true
+        required: true
     },
     email: {
         type: String,
         minLength: 5,
-        require: true,
+        required: true,
         unique: true
     },
     age: {
         type: Number,
         min: 18,
-        require: true
+        required: true
     },
     password: {
         type: String,
         hash: true,
         minLength: 5,
-        require: true
+        required: true
     },
     role: {
         type: String,

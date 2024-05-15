@@ -1,6 +1,6 @@
 const isAdmin = (req, res, next) => {
     if (!req.session.user) {
-        return res.redirect('/login')
+        return res.redirect('/views/sessions/login')
     }
 
     if (req.session.user.role != 'admin') {

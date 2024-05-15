@@ -70,7 +70,7 @@ app.get('/', async (req, res) => {
         }
       )
     } else {
-      res.redirect('/login')
+      res.redirect('/views/sessions/login')
     }
   })
 
@@ -84,10 +84,15 @@ app.use('/views/products', productsRouter)
 app.use("/views/carts", cartsRouter)
 app.use('/views/sessions', viewsRouter) // por el momento acá guardo el Chat también
 
+//Rutas no encontradas
+app.use((req, res, next) => {
+  res.status(404).send("Página no encontrada")
+})
+
 const PORT = 8080;
 const httpServer = app.listen(PORT, () => {
     console.log(`Start server in PORT ${PORT}`)
-});
+})
 
 const io = new Server(httpServer)
 

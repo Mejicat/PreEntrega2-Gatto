@@ -31,8 +31,14 @@ export default class userManagerDB {
     }
 
     try {
-      const newUser = await userModel.create({ first_name, last_name, email, age, password })
-      if (user.email == "adminCoder@coder.com" && isValidPassword(user, 'adminCod3r123')) {
+      let newUser;
+      if (password) {
+        newUser = await userModel.create({ first_name, last_name, email, age, password })
+      } else {
+        newUser = await userModel.create({ first_name, last_name, email, age })
+      }
+  
+      if (user.email === "adminCoder@coder.com" && isValidPassword(user, 'adminCod3r123')) {
         newUser.role = "admin"
         await newUser.save()
       }

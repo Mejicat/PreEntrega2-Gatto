@@ -106,9 +106,16 @@ router.get("/github", passport.authenticate('github', { scope: ['user:email'] })
   })
 })
 
-router.get("/githubcallback", passport.authenticate('github', { failureRedirect: '/login' }), (req, res) => {
-  req.session.user = req.user
-  res.redirect('/views/carts')
+router.get("/githubcallback", passport.authenticate('github', { failureRedirect: '/views/sessions/login' }), async (req, res) => {
+  try {
+    const email = req.user.email
+    const result = await userManagerService.registerUser({ email })
+    req.session.user = req.user
+    res.redirect('/views/carts')
+  } catch (error) {
+    console.error("Error al registrar usuario desde GitHub:", error)
+    res.redirect('/views/sessions/login')
+  }
 })
 
 router.get("/logout", async (req, res) => {
