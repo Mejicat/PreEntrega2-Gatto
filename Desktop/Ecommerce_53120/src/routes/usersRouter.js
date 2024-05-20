@@ -18,10 +18,10 @@ router.get('/users', async (req, res) => {
 })
 
 router.get('/current', passport.authenticate("jwt", { session: false }), async (req, res) => {
-  if (req.session.user) {
+  if (req.user) {
     res.status(200).send({
       status: 'success',
-      user: req.session.user
+      user: req.user
     })
   } else {
     res.status(400).send({
@@ -108,9 +108,8 @@ router.get("/github", passport.authenticate('github', { scope: ['user:email'] })
 
 router.get("/githubcallback", passport.authenticate('github', { failureRedirect: '/views/sessions/login' }), async (req, res) => {
   try {
-    const email = req.user.email
-    const result = await userManagerService.registerUser({ email })
-    req.session.user = req.user
+    const user = req.user
+    req.session.user = user
     res.redirect('/views/carts')
   } catch (error) {
     console.error("Error al registrar usuario desde GitHub:", error)
@@ -119,7 +118,7 @@ router.get("/githubcallback", passport.authenticate('github', { failureRedirect:
 })
 
 router.get("/logout", async (req, res) => {
-  req.clearCookie ("auth")
+  req.clearCookie("auth")
   res.redirect("/login")
 })
 

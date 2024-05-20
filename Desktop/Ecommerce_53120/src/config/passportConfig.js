@@ -1,7 +1,7 @@
 import passport from "passport"
 import jwt, { ExtractJwt } from "passport-jwt"
 import GitHubStrategy from 'passport-github2'
-import local from 'passport-local'
+import { Strategy as LocalStrategy } from 'passport-local'
 import dotenv from 'dotenv'
 
 import userModel from "../dao/models/userModel.js"
@@ -30,6 +30,7 @@ const initializatePassport = () => {
 
   const GHCLIENT_ID = process.env.GHCLIENT_ID
   const GHCLIENT_SECRET = process.env.GHCLIENT_SECRET
+  const JWT_SECRET = process.env.JWT_SECRET || "coderSecret"; // Define una clave secreta por defecto si no está en el archivo .env
 
   const cookieExtractor = (req) => {
     let token = null
@@ -44,7 +45,8 @@ const initializatePassport = () => {
     new JWTStrategy(
       {
         jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
-        secretOrKey: "coderSecret"
+        //secretOrKey: "coderSecret"
+        secretOrKey: JWT_SECRET,
       },
       async (jwt_payload, done) => {
         try {
@@ -55,7 +57,41 @@ const initializatePassport = () => {
       }
     ))
 
-  /*passport.use('login', new JWTStrategy(
+  passport.use('register', new LocalStrategy(
+    {
+      passReqToCallback: true,
+      usernameField: 'email'
+    },
+    async (req, username, password, done) => {
+      const { firstName, lastName, email, age } = req.body
+
+      try {
+        const user = await userManagerService.findUserEmail(username)
+        if (user) {
+          return done(null, false, { message: 'El usuario ya existe' })
+        }
+
+        const newUser = {
+          firstName,
+          lastName,
+          email,
+          age,
+          password
+        }
+
+        const registeredUser = await userManagerService.registerUser(newUser)
+        const cart = await cartManagerService.addCart(registeredUser._id)
+        const result = await userManagerService.updateUser(registeredUser._id, cart._id);
+
+        return done(null, result)
+      } catch (error) {
+        console.log(error.message)
+        return done(error.message)
+      }
+    }
+  ))
+
+  passport.use('login', new LocalStrategy(
     {
       usernameField: 'email'
     },
@@ -77,7 +113,7 @@ const initializatePassport = () => {
         return done(error.message)
       }
     }
-  ))*/
+  ))
 
   passport.use(
     'github',
@@ -91,9 +127,11 @@ const initializatePassport = () => {
           const user = await userModel.findOne({ username: profile._json.login })
           if (!user) {
             const newUser = {
-              username: profile._json.login,
-              name: profile._json.name,
-              password: ''
+              first_name: profile._json.name ? profile._json.name.split(' ')[0] : '',
+              last_name: profile._json.name ? profile._json.name.split(' ').slice(1).join(' ') : '',
+              email: profile._json.email,
+              age: 18, // Propongo 18 de default, para no tener problema con la restricción colocada en Users
+              password: '' // GitHub no proporciona contraseñas
             }
             const registeredUser = await userManagerService.registerUser(newUser)
             const cart = await cartManagerService.addCart(registeredUser._id)

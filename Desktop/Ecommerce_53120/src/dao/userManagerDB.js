@@ -27,22 +27,23 @@ export default class userManagerDB {
     const { first_name, last_name, email, age, password } = user
 
     if (!first_name || !last_name || !email || !age || !password) {
-      throw new Error("Error al registrar el usuario")
+      throw new Error("Error al registrar el usuario, faltan datos mandatorios")
     }
 
     try {
-      let newUser;
-      if (password) {
-        newUser = await userModel.create({ first_name, last_name, email, age, password })
-      } else {
-        newUser = await userModel.create({ first_name, last_name, email, age })
-      }
-  
+      let newUser = await userModel.create({
+        first_name: first_name || '',
+        last_name: last_name || '',
+        email,
+        age: age || 0,
+        password: password || ''
+      })
+
       if (user.email === "adminCoder@coder.com" && isValidPassword(user, 'adminCod3r123')) {
         newUser.role = "admin"
         await newUser.save()
       }
-      return "Usuario registrado correctamente"
+      return newUser
     } catch (error) {
       console.error("Error al registrar usuario:", error)
       throw error
@@ -60,7 +61,7 @@ export default class userManagerDB {
       if (!user) throw new Error("Credenciales inválidas")
       if (isValidPassword(user, password)) {
         delete user.password
-        return jwt.sign(user, "coderSecret", {expiresIn: "1h"})
+        return jwt.sign(user, "coderSecret", { expiresIn: "1h" })
       }
 
       throw new Error("Credenciales inválidas")
