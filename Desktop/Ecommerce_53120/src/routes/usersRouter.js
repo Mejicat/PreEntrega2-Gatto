@@ -8,9 +8,9 @@ const router = Router()
 const userController = new UserController();
 
 
-router.get('/users', async (req, res) => {
+router.get('/users', auth, async (req, res) => {
   try {
-    const result = await userManagerService.getUsers()
+    const result = await userService.getUsers()
     res.send({ users: result })
   } catch (error) {
     console.error(error)

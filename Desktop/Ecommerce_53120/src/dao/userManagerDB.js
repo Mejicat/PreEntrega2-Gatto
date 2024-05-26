@@ -10,7 +10,7 @@ export default class UserManagerDB {
   static getInstance() {
       if (!UserManagerDB.instance) {
           UserManagerDB.instance = new UserManagerDB()
-          UserManagerDB.instance.userModel = new userModel()
+          UserManagerDB.instance.userModel = userModel()
       }
       return UserManagerDB.instance
   }
