@@ -3,10 +3,21 @@ import jwt from "jsonwebtoken"
 import { isValidPassword } from "../utils/bcrypt.js"
 import userModel from "./models/userModel.js"
 
-export default class userManagerDB {
+export default class UserManagerDB {
+
+  constructor() {}
+
+  static getInstance() {
+      if (!UserManagerDB.instance) {
+          UserManagerDB.instance = new UserManagerDB()
+          UserManagerDB.instance.userModel = new userModel()
+      }
+      return UserManagerDB.instance
+  }
+
   async getAllUsers() {
     try {
-      return await userModel.find({}).populate('cart').populate('cart.products.product')
+      return await this.userModel.find({}).populate('cart').populate('cart.products.product')
     } catch (error) {
       console.error("Error al obtener usuario:", error)
       throw new Error("Error al consultar usuarios")
@@ -15,7 +26,7 @@ export default class userManagerDB {
 
   async getUser(uid) {
     try {
-      return await userModel.find({ _id: uid }).populate('cart').populate('cart.products.product')
+      return await this.userModel.find({ _id: uid }).populate('cart').populate('cart.products.product')
     } catch (error) {
       console.error("Error al obtener usuario:", error)
       throw new Error("Usuario inexistente")
@@ -31,7 +42,7 @@ export default class userManagerDB {
     }
 
     try {
-      let newUser = await userModel.create({
+      let newUser = await this.userModel.create({
         first_name: first_name || '',
         last_name: last_name || '',
         email,
@@ -51,14 +62,15 @@ export default class userManagerDB {
   }
 
   async login(email, password) {
-
     if (!email || !password) {
       throw new Error("Datos de acceso inválidos. Verificar e reintentar nuevamente.")
     }
 
     try {
-      const user = await userModel.findOne({ email }).lean()
+      const user = await this.userModel.findOne({ email }).lean()
+      
       if (!user) throw new Error("Credenciales inválidas")
+      
       if (isValidPassword(user, password)) {
         delete user.password
         return jwt.sign(user, "coderSecret", { expiresIn: "1h" })
@@ -69,13 +81,13 @@ export default class userManagerDB {
 
     catch (error) {
       console.error("Error al intentar hacer login:", error)
-      throw error
+      throw new Error("Error al intentar hacer login")
     }
   }
 
   async updateUser(userId, cartId) {
     try {
-      const result = await userModel.findByIdAndUpdate(userId, { cart: cartId })
+      const result = await this.userModel.findByIdAndUpdate(userId, { cart: cartId })
       return result
     } catch (error) {
       console.error("Error al actualizar usuario:", error)
@@ -85,7 +97,7 @@ export default class userManagerDB {
 
   async findUserEmail(email) {
     try {
-      const result = await userModel.findOne({ email: email })
+      const result = await this.userModel.findOne({ email: email })
       return result
     } catch (error) {
       console.error("Error al buscar usuario por email:", error)

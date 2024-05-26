@@ -1,12 +1,12 @@
 import { Router } from 'express'
-import { productManagerDB } from '../dao/productManagerDB.js'
+import { ProductManagerDB } from '../dao/productManagerDB.js'
 import { uploader } from '../utils/multerUtil.js'
 import { auth } from "../middlewares/auth.js"
 import  isAdmin  from "../middlewares/isAdmin.js"
 
 const router = Router()
 
-const ProductService = new productManagerDB()
+const ProductService = new ProductManagerDB()
 
 router.get('/realtimeproducts', auth, async (req, res) => {
     res.render(

@@ -6,8 +6,8 @@ import dotenv from 'dotenv'
 
 import userModel from "../dao/models/userModel.js"
 import { isValidPassword } from "../utils/bcrypt.js"
-import userManagerDB from "../dao/userManagerDB.js"
-import { cartManagerDB } from "../dao/cartManagerDB.js"
+import UserManagerDB from "../dao/userManagerDB.js"
+import CartManagerDB from "../dao/cartManagerDB.js"
 
 
 /*
@@ -21,8 +21,8 @@ const GHCLIENT_SECRET = d71ec3bdc55c0dee273e2ad099f67f87ab52d117;
 
 dotenv.config() //Preciso definir variables de entorno para la estrategia de autenticación de GitHub. Agrego en packege.json en SCRIPTS - START
 
-const userManagerService = new userManagerDB()
-const cartManagerService = new cartManagerDB()
+const userManagerService = new UserManagerDB()
+const cartManagerService = new CartManagerDB()
 
 const JWTStrategy = jwt.Strategy
 

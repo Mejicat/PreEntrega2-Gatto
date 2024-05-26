@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import { cartManagerDB } from '../dao/cartManagerDB.js'
+import  CartManagerDB  from '../dao/cartManagerDB.js'
 import { auth } from "../middlewares/auth.js"
 
 const router = Router()
 
-const CartService = new cartManagerDB()
+const CartService = new CartManagerDB()
 
 router.get('/:cid', auth, async (req, res) => {
     try {

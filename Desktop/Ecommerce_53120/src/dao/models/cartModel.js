@@ -4,6 +4,11 @@ import mongoosePaginate from 'mongoose-paginate-v2'
 const cartCollection = "carts"
 
 const cartsSchema = new mongoose.Schema({
+
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users"
+    },
     products: {
         type: [
             {

@@ -1,10 +1,20 @@
 import { cartModel } from './models/cartModel.js'
 
-class cartManagerDB {
+export default class CartManagerDB {
+
+    constructor() {}
+
+    static getInstance() {
+        if (!CartManagerDB.instance) {
+            CartManagerDB.instance = new CartManagerDB()
+            CartManagerDB.instance.cartModel = new cartModel()
+        }
+        return CartManagerDB.instance
+    }
 
     async addCart() {
         try {
-            const cart = await cartModel.create({})
+            const cart = await this.cartModel.create({})
             return cart
         } catch (error) {
             console.error(error)
@@ -13,7 +23,7 @@ class cartManagerDB {
 
     async getCart(id) {
         try {
-            const cart = await cartModel.findById(id).populate('products.product').lean();
+            const cart = await this.cartModel.findById(id).populate('products.product').lean();
             if (!cart) {
                 console.error('Carrito no encontrado')
                 return
@@ -26,26 +36,16 @@ class cartManagerDB {
 
     async getAllCarts() {
         try {
-            return await cartModel.find().populate('products.product').lean()
+            return await this.cartModel.find().populate('products.product').lean()
         } catch (error) {
             console.error(error.message)
             throw new Error("Error al buscar los carritos")
         }
     }
 
-    async createCart() {
-        try {
-            const newCart = await cartModel.create({ products: [] })
-            return newCart;
-        } catch (error) {
-            console.error(error.message);
-            throw new Error('Error al crear el carrito')
-        }
-    }
-
     async updateCart(cartId, products) {
         try {
-            return await cartModel.findByIdAndUpdate(cartId, { products: products })
+            return await this.cartModel.findByIdAndUpdate(cartId, { products: products })
         } catch (error) {
             console.error(error)
         }
@@ -53,7 +53,7 @@ class cartManagerDB {
 
     async updateProductQuantity(cartId, productId, quantity) {
         try {
-            return cartModel.updateOne(
+            return this.cartModel.updateOne(
                 { "_id": cartId, "products.product": productId },
                 { $set: { "products.$.quantity": quantity } }
             )
@@ -62,34 +62,32 @@ class cartManagerDB {
         }
     }
 
-    async addProductToCart(cartid, productId, quantity = 1) {
+    async addProductToCart(cartId, productId, quantity = 1) {
         try {
-            const cart = await cartModel.findOne({ _id: cartid });
+            const cart = await this.cartModel.findOne({ _id: cartId })
             if (!cart) {
-                return console.error(error)
+                throw new Error(`El carrito ${cartId} no existe`)
             }
 
-            const existingProduct = await cartModel.findOne({ "products.product": productId })
+            const existingProduct = cart.products.find(p => p.product.toString() === productId)
             if (existingProduct) {
-                await cartModel.updateOne(
-                    { "products.product": productId },
-                    { $inc: { "products.$.quantity": 1 } }
-                )
+                existingProduct.quantity += quantity;
             } else {
-                await cartModel.updateOne(
-                    { _id: cartid },
-                    { $push: { products: [{ product: productId, quantity: quantity }] } }
-                )
+                cart.products.push({ product: productId, quantity })
             }
+
+            const updatedCart = await cart.save()
+            return updatedCart;
         } catch (error) {
-            console.error(error)
+            console.error(`Error al agregar el producto ${productId} al carrito ${cartId}: ${error.message}`)
+            throw new Error("Error al agregar el producto al carrito")
         }
     }
 
 
     async getProductsFromCartByID(cid) {
         try {
-            const cart = await cartModel.findOne({ _id: cid }).populate('products.product').lean()
+            const cart = await this.cartModel.findOne({ _id: cid }).populate('products.product').lean()
 
             if (!cart) throw new Error(`El carrito ${cid} no existe!`);
 
@@ -102,7 +100,7 @@ class cartManagerDB {
 
     async deleteCart(id) {
         try {
-            return await cartModel.deleteOne({ _id: id })
+            return await this.cartModel.deleteOne({ _id: id })
         } catch (error) {
             console.error(error)
         }
@@ -110,7 +108,7 @@ class cartManagerDB {
 
     async deleteAllProductsFromCart(cartId) {
         try {
-            await cartModel.findByIdAndUpdate(cartId, { products: [] })
+            await this.cartModel.findByIdAndUpdate(cartId, { products: [] })
         } catch (error) {
             console.error(error)
         }
@@ -118,7 +116,7 @@ class cartManagerDB {
 
     async deleteProductFromCart(cartId, productId) {
         try {
-            return await cartModel.findOneAndUpdate(
+            return await this.cartModel.findOneAndUpdate(
                 { _id: cartId },
                 { $pull: { products: { product: productId } } },
             )
@@ -130,5 +128,3 @@ class cartManagerDB {
 
 
 }
-
-export { cartManagerDB }

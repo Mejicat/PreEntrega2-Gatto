@@ -75,9 +75,9 @@ app.get('/', async (req, res) => {
   })
 
 //Router respuesta tradicional / endpoint
-app.use('/api/products', apiProductRouter)
-app.use('/api/carts', apiCartRouter)
-app.use('/api/sessions', usersRouter)
+app.use('/api', apiProductRouter)
+app.use('/api', apiCartRouter)
+app.use('/api/users', usersRouter)
 
 //Router vistas de navegación
 app.use('/views/products', productsRouter)

@@ -1,6 +1,6 @@
 import messageModel from './models/messageModel.js'
 
-class messageManagerDB {
+class MessageManagerDB {
     
     async createMessage(data) {
         const  {user, message} = data;
@@ -40,4 +40,4 @@ class messageManagerDB {
     }
 }
 
-export default messageManagerDB
+export default MessageManagerDB

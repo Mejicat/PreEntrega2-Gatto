@@ -1,11 +1,12 @@
 import { Router } from 'express'
-import userManagerDB from "../dao/userManagerDB.js"
 import passport from "passport"
+
 import { auth } from '../middlewares/auth.js'
+import  UserController  from '../controllers/userController.js';
 
 const router = Router()
+const userController = new UserController();
 
-const userManagerService = new userManagerDB()
 
 router.get('/users', async (req, res) => {
   try {
@@ -121,5 +122,13 @@ router.get("/logout", async (req, res) => {
   req.clearCookie("auth")
   res.redirect("/login")
 })
+
+// Nuevas rutas para el controlador de usuarios
+router.get('/users', userController.getAllUsers)
+router.get('/:id', userController.getUserById)
+router.post('/register', userController.registerUser)
+router.post('/login', userController.loginUser)
+router.put('/:id/cart', userController.updateUserCart)
+router.get('/email/:email', userController.findUserByEmail)
 
 export default router

@@ -1,10 +1,14 @@
-import { Router } from 'express'
-import { productManagerDB } from '../dao/productManagerDB.js'
-import { uploader } from '../utils/multerUtil.js'
+import express from 'express';
+import { ProductController } from '../controllers/productController.js';
 
-const router = Router()
+const router = express.Router()
+const productController = new ProductController()
 
-const ProductService = new productManagerDB()
+router.get('/products', (req, res) => productController.getProducts(req, res))
+router.get('/products/:pid', (req, res) => productController.getProductById(req, res))
+router.post('/products', (req, res) => productController.createProduct(req, res))
+router.put('/products/:pid', (req, res) => productController.updateProduct(req, res))
+router.delete('/products/:pid', (req, res) => productController.deleteProduct(req, res))
 
 router.get('/', async (req, res) => {
     let { limit, page, sort, category, status } = req.query
@@ -49,73 +53,6 @@ router.get('/', async (req, res) => {
     }
 })
 
-router.get('/:pid', async (req, res) => {
-    try {
-        const result = await ProductService.getProductByID(req.params.pid)
-        res.send({product: result})
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        })
-    }
-})
 
-router.post('/', uploader.array('thumbnails', 3), async (req, res) => {
-    if (req.files) {
-        req.body.thumbnails = [];
-        req.files.forEach((file) => {
-            req.body.thumbnails.push(file.filename);
-        })
-    }
-    try {
-        const result = await ProductService.createProduct(req.body)
-        res.send({
-            status: 'success',
-            payload: result
-        })
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        })
-    }
-})
-
-router.put('/:pid', uploader.array('thumbnails', 3), async (req, res) => { //Añado hasta 3 fotos para el producto
-    if (req.files) {
-        req.body.thumbnails = []
-        req.files.forEach((file) => {
-            req.body.thumbnails.push(file.filename)
-        });
-    }
-    try {
-        const result = await ProductService.updateProduct(req.params.pid, req.body)
-        res.send({
-            status: 'success',
-            payload: result
-        })
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        })
-    }
-})
-
-router.delete('/:pid', async (req, res) => {
-    try {
-        const result = await ProductService.deleteProduct(req.params.pid)
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        });
-    }
-});
 
 export default router
