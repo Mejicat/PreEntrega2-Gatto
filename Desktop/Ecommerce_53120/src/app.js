@@ -8,6 +8,7 @@ import handlebars from 'express-handlebars';
 import {Server} from 'socket.io';
 import passport from 'passport';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 
 import __dirname from './utils/constantsUtil.js';
 import initializatePassport from './config/passportConfig.js';
@@ -35,6 +36,7 @@ app.set('view engine', 'handlebars')
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 app.use(express.static('public'))
+app.use(cors())
 app.use(cookieParser())
 
 //Session Middlewares
