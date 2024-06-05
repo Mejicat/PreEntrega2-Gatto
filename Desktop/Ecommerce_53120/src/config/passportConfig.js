@@ -6,8 +6,8 @@ import dotenv from 'dotenv'
 
 import userModel from "../dao/models/userModel.js"
 import { isValidPassword } from "../utils/bcrypt.js"
-import UserManagerDB from "../dao/userManagerDB.js"
-import CartManagerDB from "../dao/cartManagerDB.js"
+import CartService from "../services/cartService.js";
+import UserService from "../services/userService.js";
 
 
 /*
@@ -20,9 +20,6 @@ const GHCLIENT_SECRET = d71ec3bdc55c0dee273e2ad099f67f87ab52d117;
 */
 
 dotenv.config() //Preciso definir variables de entorno para la estrategia de autenticación de GitHub. Agrego en packege.json en SCRIPTS - START
-
-const userManagerService = new UserManagerDB()
-const cartManagerService = new CartManagerDB()
 
 const JWTStrategy = jwt.Strategy
 
@@ -60,13 +57,14 @@ const initializatePassport = () => {
   passport.use('register', new LocalStrategy(
     {
       passReqToCallback: true,
-      usernameField: 'email'
+      usernameField: 'email',
+      passwordField: 'password'
     },
     async (req, username, password, done) => {
       const { firstName, lastName, email, age } = req.body
 
       try {
-        const user = await userManagerService.findUserEmail(username)
+        const user = await UserService.findUserEmail(username)
         if (user) {
           return done(null, false, { message: 'El usuario ya existe' })
         }
@@ -79,9 +77,9 @@ const initializatePassport = () => {
           password
         }
 
-        const registeredUser = await userManagerService.registerUser(newUser)
-        const cart = await cartManagerService.addCart(registeredUser._id)
-        const result = await userManagerService.updateUser(registeredUser._id, cart._id);
+        const registeredUser = await UserService.registerUser(newUser)
+        const cart = await CartService.addCart(registeredUser._id)
+        const result = await UserService.updateUser(registeredUser._id, cart._id);
 
         return done(null, result)
       } catch (error) {
@@ -93,11 +91,13 @@ const initializatePassport = () => {
 
   passport.use('login', new LocalStrategy(
     {
-      usernameField: 'email'
+      usernameField: 'email',
+      passwordField: 'password',
+      failureFlash: true
     },
     async (username, password, done) => {
       try {
-        const user = await userManagerService.findUserEmail(username)
+        const user = await UserService.findUserEmail(username)
         if (!user) {
           console.log('El usuario no existe')
           return done('El usuario no existe')
@@ -133,9 +133,9 @@ const initializatePassport = () => {
               age: 18, // Propongo 18 de default, para no tener problema con la restricción colocada en Users
               password: '' // GitHub no proporciona contraseñas
             }
-            const registeredUser = await userManagerService.registerUser(newUser)
-            const cart = await cartManagerService.addCart(registeredUser._id)
-            const result = await userManagerService.updateUser(registeredUser._id, cart._id)
+            const registeredUser = await UserService.registerUser(newUser)
+            const cart = await CartService.addCart(registeredUser._id)
+            const result = await UserService.updateUser(registeredUser._id, cart._id)
             done(null, result)
           } else {
             done(null, user)
@@ -149,7 +149,7 @@ const initializatePassport = () => {
   passport.serializeUser((user, done) => done(null, user._id))
 
   passport.deserializeUser(async (id, done) => {
-    const user = await userModel.findById(id)
+    const user = await UserService.findById(id)
     done(null, user)
   })
 }

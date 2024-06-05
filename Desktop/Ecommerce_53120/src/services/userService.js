@@ -1,64 +1,79 @@
-import UserManagerDB from "../dao/userManagerDB.js"
+import UserDAO from "../dao/userDAO.js";
+import UserDTO from "../dao/dto/userDTO.js";
 
 class UserService {
-
-    constructor() {
-        this.userDAO = UserManagerDB.getInstance()
-    }
-
-    async getAllUsers() {
+    async getUsers() {
         try {
-            return await this.userDAO.getAllUsers()
+          const users = await UserDAO.getUsers()
+          if (!users) {
+            throw new Error("No users found")
+          }
+          return users.map((user) => new UserDTO(user))
         } catch (error) {
-            console.error("Error al obtener todos los usuarios:", error)
-            throw new Error("Error al obtener todos los usuarios")
+          throw error;
         }
-    }
-
-    async getUserById(uid) {
+      }
+    
+      async getUserById(userId) {
         try {
-            return await this.userDAO.getUser(uid)
+          const user = await UserDAO.getUserById(userId)
+          if (!user) {
+            throw new Error("User not found")
+          }
+          return new UserDTO(user)
         } catch (error) {
-            console.error(`Error al obtener el usuario con ID ${uid}:`, error)
-            throw new Error(`Error al obtener el usuario con ID ${uid}`)
+          throw error
         }
-    }
-
-    async registerUser(user) {
+      }
+    
+      async registerUser(user) {
         try {
-            return await this.userDAO.registerUser(user)
+          const newUser = await UserDAO.registerUser(user)
+          if (!newUser) {
+            throw new Error("Error registering user")
+          }
+          return new UserDTO(newUser);
         } catch (error) {
-            console.error("Error al registrar usuario:", error)
-            throw new Error("Error al registrar usuario")
+          throw error
         }
-    }
-
-    async loginUser(email, password) {
+      }
+    
+      async verifyUser(userId) {
         try {
-            return await this.userDAO.login(email, password)
+          const user = await UserDAO.verifyUser(userId);
+          if (!user) {
+            throw new Error("Error al verificar al usuario")
+          }
+          return new UserDTO(user);
         } catch (error) {
-            console.error("Error al intentar hacer login:", error)
-            throw new Error("Error al intentar hacer login")
+          throw error
         }
-    }
-
-    async updateUserCart(userId, cartId) {
+      }
+    
+      async updateUser(userId, cartId) {
         try {
-            return await this.userDAO.updateUser(userId, cartId)
+          const user = await UserDAO.updateUser(userId, cartId);
+          if (!user) {
+            throw new Error("Error al actualizar al usuario");
+          }
+          return new UserDTO(user);
         } catch (error) {
-            console.error(`Error al actualizar el carrito del usuario ${userId}:`, error)
-            throw new Error(`Error al actualizar el carrito del usuario ${userId}`)
+          throw error
         }
-    }
-
-    async findUserByEmail(email) {
+      }
+    
+      async findUserEmail(email) {
         try {
-            return await this.userDAO.findUserEmail(email)
+          const user = await UserDAO.findUserEmail(email);
+          if (user) {
+            return new UserDTO(user);
+          } else {
+            return null;
+          }
         } catch (error) {
-            console.error("Error al buscar usuario por email:", error)
-            throw new Error("Error al buscar usuario por email")
+          throw error
         }
+      }
     }
-}
 
 export default UserService

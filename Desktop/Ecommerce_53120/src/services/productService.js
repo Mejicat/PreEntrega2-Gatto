@@ -1,55 +1,67 @@
-import { ProductManagerDB } from "../dao/productManagerDB.js"
+import ProductDAO from "../dao/productDAO.js";
+import ProductDTO from "../dao/dto/productDTO.js";
 
 class ProductService {
 
-    constructor() {
-        this.productDAO = ProductManagerDB.getInstance()
-    }
-
     async getProducts(limit, page, query, sort) {
         try {
-            return await this.productDAO.getAllProducts(limit, page, query, sort)
+          const products = await ProductDAO.getProducts(limit, page, query, sort)
+          if (!products) {
+            throw new Error("No se encontraron productos")
+          }
+          return products
         } catch (error) {
-            console.error(`Error al obtener los productos: ${error.message}`)
-            throw new Error("Error al obtener los productos")
+          throw error
         }
-    }
-
-    async getProductById(pid) {
+      }
+    
+      async getProductById(id) {
         try {
-            return await this.productDAO.getProductByID(pid)
+          const product = await ProductDAO.getProductById(id)
+          if (!product) {
+            throw new Error("Product not found")
+          }
+          return new ProductDTO(product)
         } catch (error) {
-            console.error(`Error al obtener el producto con ID ${pid}: ${error.message}`)
-            throw new Error(`Error al obtener el producto con ID ${pid}`)
+          throw error
         }
-    }
-
-    async createProduct(product) {
+      }
+    
+      async addProduct(productData) {
         try {
-            return await this.productDAO.createProduct(product)
+          const product = await ProductDAO.addProduct(productData)
+          if (!product) {
+            throw new Error("Error al agregar producto")
+          }
+          return new ProductDTO(product);
         } catch (error) {
-            console.error(`Error al crear el producto: ${error.message}`)
-            throw new Error('Error al crear el producto')
+          throw error
         }
-    }
-
-    async updateProduct(pid, productUpdate) {
+      }
+    
+      async updateProduct(id, updatedFields) {
         try {
-            return await this.productDAO.updateProduct(pid, productUpdate)
+          const product = await ProductDAO.updateProduct(id, updatedFields)
+          if (!product) {
+            throw new Error("Error al actualizar el producto")
+          }
+          return new ProductDTO(product)
         } catch (error) {
-            console.error(`Error al actualizar el producto ${pid}: ${error.message}`)
-            throw new Error('Error al actualizar el producto')
+          throw error
         }
-    }
-
-    async deleteProduct(pid) {
+      }
+    
+      async deleteProduct(id) {
         try {
-            return await this.productDAO.deleteProduct(pid)
+          const product = await ProductDAO.deleteProduct(id)
+          if (!product) {
+            throw new Error("Error al borrar el producto")
+          }
+          return new ProductDTO(product)
         } catch (error) {
-            console.error(`Error al eliminar el producto ${pid}: ${error.message}`)
-            throw new Error(`Error al eliminar el producto ${pid}`)
+          throw error
         }
+      }
     }
-}
-
+    
 export default ProductService

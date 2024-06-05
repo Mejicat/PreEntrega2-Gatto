@@ -1,8 +1,8 @@
 const auth = (req, res, next) => {
-    if (!req.session.user) {
-      return res.redirect('/views/sessions/login') //si no está logeado, vuelve al login
-    }
-    return next()
+  if (!req.session.user) {
+    return res.status(401).send({status: 'error', message: 'Usuario no autorizado'})
   }
-  
-  export {auth}
+  return next()
+}
+
+export default { auth }

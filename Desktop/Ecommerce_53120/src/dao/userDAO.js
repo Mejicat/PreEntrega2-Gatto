@@ -3,16 +3,16 @@ import jwt from "jsonwebtoken"
 import { isValidPassword } from "../utils/bcrypt.js"
 import userModel from "./models/userModel.js"
 
-export default class UserManagerDB {
+export default class UserDAO {
 
-  constructor() {}
+  constructor() { }
 
   static getInstance() {
-      if (!UserManagerDB.instance) {
-          UserManagerDB.instance = new UserManagerDB()
-          UserManagerDB.instance.userModel = userModel()
-      }
-      return UserManagerDB.instance
+    if (!UserDAO.instance) {
+      UserDAO.instance = new UserDAO()
+      UserDAO.instance.userModel = userModel()
+    }
+    return UserDAO.instance
   }
 
   async getAllUsers() {
@@ -24,7 +24,7 @@ export default class UserManagerDB {
     }
   }
 
-  async getUser(uid) {
+  async getUserById(uid) {
     try {
       return await this.userModel.find({ _id: uid }).populate('cart').populate('cart.products.product')
     } catch (error) {
@@ -33,6 +33,14 @@ export default class UserManagerDB {
     }
   }
 
+  saveUser = async (user) => {
+    try {
+      return await userModel.create(user)
+    } catch (error) {
+      console.log(error.message)
+      return null
+    }
+  }
 
   async registerUser(user) {
     const { first_name, last_name, email, age, password } = user
@@ -68,9 +76,9 @@ export default class UserManagerDB {
 
     try {
       const user = await this.userModel.findOne({ email }).lean()
-      
+
       if (!user) throw new Error("Credenciales inválidas")
-      
+
       if (isValidPassword(user, password)) {
         delete user.password
         return jwt.sign(user, "coderSecret", { expiresIn: "1h" })
@@ -91,6 +99,15 @@ export default class UserManagerDB {
       return result
     } catch (error) {
       console.error("Error al actualizar usuario:", error)
+      throw error
+    }
+  }
+
+  async verifyUser(userId) {
+    try {
+      const user = await userModel.findByIdAndUpdate(userId, {verified: true}, {new: true})
+      return user
+    } catch (error) {
       throw error
     }
   }

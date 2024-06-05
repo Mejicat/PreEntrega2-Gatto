@@ -5,4 +5,4 @@ const logged = (req, res, next) => {
     return next()
   }
   
-  export {logged}
+  export default logged

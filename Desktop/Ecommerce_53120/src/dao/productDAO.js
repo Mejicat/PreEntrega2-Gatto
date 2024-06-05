@@ -1,15 +1,15 @@
 import productModel from './models/productModel.js'
 
-class ProductManagerDB {
+class ProductDAO {
 
     constructor() { }
 
     static getInstance() {
-        if (!ProductManagerDB.instance) {
-            ProductManagerDB.instance = new ProductManagerDB()
-            ProductManagerDB.instance.productModel = new productModel()
+        if (!ProductDAO.instance) {
+            ProductDAO.instance = new ProductDAO()
+            ProductDAO.instance.productModel = new productModel()
         }
-        return ProductManagerDB.instance
+        return ProductDAO.instance
     }
 
     async getAllProducts(limit, page, query, sort) {
@@ -77,4 +77,4 @@ class ProductManagerDB {
     }
 }
 
-export { ProductManagerDB }
+export default  ProductDAO 

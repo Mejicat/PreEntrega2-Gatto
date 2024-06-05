@@ -6,7 +6,7 @@ const isAdmin = (req, res, next) => {
     if (req.session.user.role != 'admin') {
         return res.status(400).send({
             status: "error",
-            message: "Unathorized"
+            message: "Su usuario no se encuentra autorizado"
         })
     }
 

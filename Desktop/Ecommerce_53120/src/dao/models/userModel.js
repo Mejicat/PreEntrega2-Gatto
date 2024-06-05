@@ -34,8 +34,12 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        default: 'user'
+        default: 'usuario'
     },
+    verified: {
+        type: Boolean,
+        default: false
+      },
     cart: {
         type: [
             {

@@ -1,104 +1,76 @@
-import { Router } from 'express'
-import { ProductManagerDB } from '../dao/productManagerDB.js'
-import { uploader } from '../utils/multerUtil.js'
-import { auth } from "../middlewares/auth.js"
-import  isAdmin  from "../middlewares/isAdmin.js"
+import { Router } from 'express';
+
+
+import { uploader } from '../utils/multerUtil.js';
+import ProductService from "../services/productService.js";
+import authRedirect from "../middlewares/authRedirect.js";
+import isAdmin from "../middlewares/isAdmin.js";
+import isVerified from "../middlewares/isVerified.js";
 
 const router = Router()
-
-const ProductService = new ProductManagerDB()
-
-router.get('/realtimeproducts', auth, async (req, res) => {
-    res.render(
-        'realTimeProducts',
+router.get('/', authRedirect, isVerified, async (req, res) => {
+    try {
+      const limit = +req.query.limit || 10;
+      const page = +req.query.page || 1;
+      const { query = null, sort = null } = req.query;
+  
+      if (query) {
+        query = JSON.parse(query);
+      }
+      if (sort) {
+        sort = JSON.parse(sort)
+      }
+  
+      const products = await ProductService.getProducts(limit, page, query, sort);
+      res.render(
+        "products",
         {
-            title: 'Productos',
-            style: 'index.css',
-            products: await ProductService.getAllProducts()
-        }
-    )
-})
-
-router.get('/', auth, async (req, res) => {
-    let { limit, page, sort, category, status } = req.query
-    let sortOptions
-    try {
-        if (sort == "asc") {
-            sortOptions = { price: 1 }
-        } else if (sort == "desc") {
-            sortOptions = { price: -1 }
-        } else {
-            sortOptions = {}
-        }
-        let filter
-        if (category) {
-            filter = { category: category }
-        } else if (status) {
-            filter = { status: status }
-        } else {
-            filter = {}
-        }
-        const result = await ProductService.getAllProducts(filter, { limit: limit ? limit : 10, page: page ? page : 1, sort: sortOptions })
-        const baseURL = "http://localhost:8080/products"
-        res.render("products",
-            {
-                style: "index.css",
-                status: "success",
-                products: result.docs,
-                totalPages: result.totalPages,
-                prevPage: result.prevPage,
-                nextPage: result.nextPage,
-                page: result.page,
-                hasPrevPage: result.hasPrevPage,
-                hasNextPage: result.hasNextPage,
-                prevLink: result.prevPage ? `${baseURL}?page=${result.prevPage}` : "",
-                nextLink: result.nextPage ? `${baseURL}?page=${result.nextPage}` : ""
-            })
+        status: 'success',
+        user: req.session.user,
+        products: products.docs,
+        totalPages: products.totalPages,
+        prevPage: products.prevPage,
+        nextPage: products.nextPage,
+        page: products.page,
+        hasPrevPage: products.hasPrevPage,
+        hasNextPage: products.hasNextPage,
+        prevLink: products.prevPage ? `/products?${query ? `query=${encodeURIComponent(JSON.stringify(query))}` : ''}${limit ? `&limit=${limit}` : ''}${sort ? `&sort=${encodeURIComponent(JSON.stringify(sort))}` : ''}&page=${products.prevPage}` : null,
+        nextLink: products.nextPage ? `/products?${query ? `query=${encodeURIComponent(JSON.stringify(query))}` : ''}${limit ? `&limit=${limit}` : ''}${sort ? `&sort=${encodeURIComponent(JSON.stringify(sort))}` : ''}&page=${products.nextPage}` : null,
+        limit, 
+        page,
+        query,
+        sort
+      })
     } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        })
+      res.status(400).send({status: 'error', message: error.message})
     }
-});
-
-router.get('/:pid', auth, async (req, res) => {
-
+  })
+  
+  router.get('/add', authRedirect, isVerified, isAdmin, async (req, res) => {
     try {
-        const result = await ProductService.getProductByID(req.params.pid)
-        res.render("product",
-            {
-                style: "index.css",
-                payload: result
-            })
+      res.render(
+        "addProduct",
+        {
+        }
+      )
     } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
-        })
+      res.status(400).send({status: 'error', message: error.message})
     }
-})
-
-router.post('/', uploader.array('thumbnails', 3),  auth, isAdmin, async (req, res) => {
-
-    if (req.files) {
-        req.body.thumbnails = [];
-        req.files.forEach((file) => {
-            req.body.thumbnails.push(file.filename)
-        });
-    }
+  })
+  
+  router.get('/:pid', authRedirect, isVerified, async (req, res) => {
+    const productId = req.params.pid
     try {
-        const result = await ProductService.createProduct(req.body)
-        res.send({
-            status: 'success',
-            payload: result
-        });
-    } catch (error) {
-        res.status(400).send({
-            status: 'error',
-            message: error.message
+      const product = await productService.getProductById(productId)
+      res.render(
+        "product",
+        {
+          title: product.title,
+          product: product
         })
+    } catch (error) {
+      res.status(400).send({status: 'error', message: error.message})
     }
-})
-
-export default router
+  })
+  
+  export default router

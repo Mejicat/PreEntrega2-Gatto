@@ -1,15 +1,15 @@
 import { cartModel } from './models/cartModel.js'
 
-export default class CartManagerDB {
+export default class CartDAO {
 
     constructor() {}
 
     static getInstance() {
-        if (!CartManagerDB.instance) {
-            CartManagerDB.instance = new CartManagerDB()
-            CartManagerDB.instance.cartModel = new cartModel()
+        if (!CartDAO.instance) {
+            CartDAO.instance = new CartDAO()
+            CartDAO.instance.cartModel = new cartModel()
         }
-        return CartManagerDB.instance
+        return CartDAO.instance
     }
 
     async addCart() {
@@ -124,7 +124,4 @@ export default class CartManagerDB {
             console.error(error)
         }
     }
-
-
-
 }

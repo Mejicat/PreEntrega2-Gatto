@@ -1,91 +1,112 @@
-import cartManagerDB from "../dao/cartManagerDB.js"
+import CartDAO from "../dao/cartDAO.js";
+import CartDTO from "../dao/dto/cartDTO.js";
 
 class CartService {
-
-    constructor() {
-        this.cartDao = cartManagerDB.getInstance()
-    }
-
-    async createCart() {
+    async addCart(userId) {
         try {
-            const cart = await this.cartDao.addCart()
-            return cart;
+          const cart = await CartDAO.getCartWithUserId(userId)
+          if (cart) {
+            return new CartDTO(cart)
+          }
+          const newCart = await CartDAO.addCart(userId)
+          if (!newCart) {
+            throw new Error('Error creating cart')
+          }
+          return new CartDTO(newCart)
         } catch (error) {
-            console.error("Error al crear el carrito:", error.message)
-            throw new Error("Error al crear el carrito")
+          throw error
         }
-    }
-
-    async getCartById(cartId) {
+      }
+    
+      async getCart(id) {
         try {
-            const cart = await this.cartDao.getCart(cartId)
-            if (!cart) {
-                throw new Error(`El carrito con id ${cartId} no existe`)
-            }
-            return cart;
+          const cart = await CartDAO.getCart(id)
+          return new CartDTO(cart)
         } catch (error) {
-            console.error("Error al obtener el carrito:", error.message)
-            throw new Error("Error al obtener el carrito")
+          throw error
         }
-    }
-
-    async getAllCarts() {
+      }
+    
+      async getCartWithUserId(userId) {
         try {
-            const carts = await this.cartDao.getAllCarts()
-            return carts;
+          const cart = await CartDAO.getCartWithUserId(userId)
+          return new CartDTO(cart)
         } catch (error) {
-            console.error("Error al obtener los carritos:", error.message)
-            throw new Error("Error al obtener los carritos")
+          throw error
         }
-    }
-
-    async addProductToCart(cartId, productId, quantity = 1) {
+      }
+    
+      async getAllCarts() {
         try {
-            const cart = await this.cartDao.addProductToCart(cartId, productId, quantity)
-            return cart;
+          const carts = await CartDAO.getAllCarts()
+          if (!carts) {
+            throw new Error('No carts found')
+          }
+          return carts.map((cart) => new CartDTO(cart))
         } catch (error) {
-            console.error(`Error al agregar el producto ${productId} al carrito ${cartId}:`, error.message)
-            throw new Error("Error al agregar el producto al carrito")
+          throw error
         }
-    }
-
-    async updateProductQuantity(cartId, productId, quantity) {
+      }
+    
+      async updateProductQuantity(cartId, productId, quantity) {
         try {
-            const result = await this.cartDao.updateProductQuantity(cartId, productId, quantity)
-            return result
+          const cart = await CartDAO.updateProductQuantity(cartId, productId, quantity)
+          if (!cart) {
+            throw new Error('Error updating product quantity')
+          }
+          return new CartDTO(cart)
         } catch (error) {
-            console.error(`Error al actualizar la cantidad del producto ${productId} en el carrito ${cartId}:`, error.message)
-            throw new Error("Error al actualizar la cantidad del producto en el carrito")
+          throw error
         }
-    }
-
-    async removeProductFromCart(cartId, productId) {
+      }
+    
+      async addProductToCart(cartId, productId, quantity) {
         try {
-            const result = await this.cartDao.deleteProductFromCart(cartId, productId)
-            return result
+          const cart = await CartDAO.addProductToCart(cartId, productId, quantity)
+          if (!cart) {
+            throw new Error('Error adding product to cart')
+          }
+          return new CartDTO(cart)
         } catch (error) {
-            console.error(`Error al eliminar el producto ${productId} del carrito ${cartId}:`, error.message)
-            throw new Error("Error al eliminar el producto del carrito")
+          throw error
         }
-    }
-
-    async emptyCart(cartId) {
+      }
+    
+      async deleteProductFromCart(cartId, productId) {
         try {
-            await this.cartDao.deleteAllProductsFromCart(cartId)
+          const cart = CartDAO.deleteProductFromCart(cartId, productId)
+          if (!cart) {
+            throw new Error('Error deleting product from cart')
+          }
+          return new CartDTO(cart);
         } catch (error) {
-            console.error(`Error al vaciar el carrito ${cartId}:`, error.message)
-            throw new Error("Error al vaciar el carrito")
+          throw error
         }
-    }
-
-    async deleteCart(cartId) {
+      }
+      
+      async deleteAllProductsFromCart(cartId) {
         try {
-            await this.cartDao.deleteCart(cartId)
+          const cart = CartDAO.deleteAllProductsFromCart(cartId)
+          if (!cart) {
+            throw new Error('Error deleting products from cart')
+          }
+          return new CartDTO(cart);
         } catch (error) {
-            console.error(`Error al eliminar el carrito ${cartId}:`, error.message)
-            throw new Error("Error al eliminar el carrito")
+          throw error
         }
+      }
+      
+      async deleteCart(id) {
+        try {
+          const cart = await CartDAO.deleteCart(id)
+          if (!cart) {
+            throw new Error('Error deleting cart')
+          }
+          return new CartDTO(cart)
+        } catch (error) {
+          throw error
+        }
+      }
     }
-}
-
-export default CartService
+    
+  export default new CartService()

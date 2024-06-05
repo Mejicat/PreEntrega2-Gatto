@@ -1,12 +1,14 @@
 import { Router } from 'express'
-import  CartManagerDB  from '../dao/cartManagerDB.js'
-import { auth } from "../middlewares/auth.js"
+
+import CartDAO from '../dao/cartDAO.js'
+import  authRedirect  from "../middlewares/authRedirect.js"
+import isVerified from '../middlewares/isVerified.js'
 
 const router = Router()
 
-const CartService = new CartManagerDB()
+const CartService = new CartDAO()
 
-router.get('/:cid', auth, async (req, res) => {
+router.get('/:cid', authRedirect, isVerified, async (req, res) => {
     try {
         const result = await CartService.getProductsFromCartByID(req.params.cid)
         res.render(

@@ -1,12 +1,13 @@
 import {Router} from 'express'
-import messageManagerDB from "../dao/messageManagerDB.js"
-import { auth } from "../middlewares/auth.js"
-import { logged } from "../middlewares/logged.js"
-import { cartModel } from '../dao/models/cartModel.js'
+
+import logged from "../middlewares/logged.js";
+import CartService from "../services/cartService.js";
+import authRedirect from "../middlewares/authRedirect.js";
+import isVerified from "../middlewares/isVerified.js";
 
 const router = Router()
 
-const messageService = new messageManagerDB()
+const messageService = new MessageDAO()
 
 //Rutas públicas
 router.get('/login', logged, async (req, res) => {
@@ -32,24 +33,10 @@ router.get('/register', logged, async (req, res) => {
     })
 })
 
-router.get("/chat", async (req, res) => {
-    try {
-        const messages = await messageService.getAllMessages()
-        res.render("chat", {
-            title: "Chat",
-            style: "index.css",
-            messages: messages,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Internal Server Error")
-    }
-})
-
 //Ruta si el usuario está loggeado
-router.get('/user', auth, async (req, res) => {
+router.get('/user', authRedirect, isVerified, async (req, res) => {
   const userId = req.session.user._id
-  const cart = await cartModel.findOne({user: userId}).lean()
+  const cart = await CartService.getCart(userId)
   res.render(
     "user",
     {
@@ -59,5 +46,6 @@ router.get('/user', auth, async (req, res) => {
     }
   )
 })
+
 
 export default router;

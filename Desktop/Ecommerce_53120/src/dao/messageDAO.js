@@ -1,6 +1,6 @@
 import messageModel from './models/messageModel.js'
 
-class MessageManagerDB {
+class MessageDAO {
     
     async createMessage(data) {
         const  {user, message} = data;
@@ -40,4 +40,4 @@ class MessageManagerDB {
     }
 }
 
-export default MessageManagerDB
+export default MessageDAO

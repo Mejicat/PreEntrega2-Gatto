@@ -1,54 +1,28 @@
 import { Router } from 'express'
 import passport from "passport"
 
-import { auth } from '../middlewares/auth.js'
-import  UserController  from '../controllers/userController.js';
+import UserService from "../services/userService.js";
+import  auth  from '../middlewares/auth.js';
+import isAdmin from "../middlewares/isAdmin.js";
+import isVerified from "../middlewares/isVerified.js";
 
-const router = Router()
-const userController = new UserController();
+const router = Router();
 
-
-router.get('/users', auth, async (req, res) => {
+router.get('/current', passport.authenticate("jwt", { session: false }), auth, isVerified, async (req, res) => {
   try {
-    const result = await userService.getUsers()
-    res.send({ users: result })
+    const user = await userService.getUserById(req.session.user._id);
+    res.status(200).send({status: 'success', message: 'User found', user});
   } catch (error) {
-    console.error(error)
-    res.status(500).send("Internal Server Error")
+    res.status(400).send({status: 'error', message: error.message});
   }
 })
 
-router.get('/current', passport.authenticate("jwt", { session: false }), async (req, res) => {
-  if (req.user) {
-    res.status(200).send({
-      status: 'success',
-      user: req.user
-    })
-  } else {
-    res.status(400).send({
-      status: 'error',
-      message: "Usuario no encontrado"
-    })
-  }
-})
-
-router.get('/:uid'), passport.authenticate("jwt", { session: false }), (req, res, next) => {
-
-  if (req.user.role === "admin") return next()
-  res.status(403).send({
-    status: "error",
-    message: "Unauthorized"
-  })
-}, async (req, res) => {
+router.get('/users'), passport.authenticate("jwt", { session: false }), isAdmin, auth, isVerified, async (req, res, next) => {
   try {
-    const result = await userManagerService.getUser(req.params.uid)
-    res.send({
-      status: "success",
-      payload: result
-    })
+    const users = await UserService.getUsers()
+    res.status(200).send({status: 'success', message: 'usuarios encontrados', users})
   } catch (error) {
-    console.error(error)
-    res.status(500).send("Internal Server Error")
+    res.status(400).send({status: 'error', message: error.message})
   }
 }
 
@@ -81,7 +55,7 @@ router.post('/login', passport.authenticate('login', { failureRedirect: '/api/se
   async (req, res) => {
     try {
       const { email, password } = req.body
-      const token = await userManagerService.login(email, password)
+      const token = await UserService.login(email, password)
       res.cookie("auth", token, { maxAge: 60 * 60 * 1000 }).send(
         {
           status: "success",
@@ -122,13 +96,5 @@ router.get("/logout", async (req, res) => {
   req.clearCookie("auth")
   res.redirect("/login")
 })
-
-// Nuevas rutas para el controlador de usuarios
-router.get('/users', userController.getAllUsers)
-router.get('/:id', userController.getUserById)
-router.post('/register', userController.registerUser)
-router.post('/login', userController.loginUser)
-router.put('/:id/cart', userController.updateUserCart)
-router.get('/email/:email', userController.findUserByEmail)
 
 export default router

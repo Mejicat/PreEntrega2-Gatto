@@ -1,8 +1,8 @@
-import { ProductManagerDB } from "./dao/productManagerDB.js"
-import MessageManagerDB  from "./dao/messageManagerDB.js"
+import ProductDAO from "./dao/productDAO.js"
+import MessageDAO from "./dao/messageDAO.js"
 
-const ProductService = new ProductManagerDB()
-const MessageService = new MessageManagerDB()
+const ProductService = new ProductDAO()
+const MessageService = new MessageDAO()
 
 export default (io) => {
     io.on("connection", (socket) => {
