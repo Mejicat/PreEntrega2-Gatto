@@ -16,7 +16,7 @@ import __dirname from './utils/constantsUtil.js';
 import initializatePassport from './config/passportConfig.js';
 import apiProductRouter from './routes/apiProductRouter.js';
 import apiCartRouter from './routes/apiCartRouter.js';
-import apiMessageRouter from './routes/apiMesssageRouter.js';
+import apiMessageRouter from './routes/apiMessageRouter.js';
 import apiTicketsRouter from './routes/apiTicketRouter.js';
 import productsRouter from './routes/productsRouter.js';
 import cartsRouter from './routes/cartsRouter.js';

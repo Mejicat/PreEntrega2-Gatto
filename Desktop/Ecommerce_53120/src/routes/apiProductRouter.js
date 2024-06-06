@@ -6,6 +6,7 @@ import isAdmin from "../middlewares/isAdmin.js";
 import isVerified from "../middlewares/isVerified.js";
 
 const router = express.Router()
+
 router.get('/', auth, isVerified, async (req, res) => {
     const limit = +req.query.limit || 10;
     const page = +req.query.page || 1;
