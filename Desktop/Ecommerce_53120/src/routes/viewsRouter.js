@@ -7,8 +7,6 @@ import isVerified from "../middlewares/isVerified.js";
 
 const router = Router()
 
-const messageService = new MessageDAO()
-
 //Rutas públicas
 router.get('/login', logged, async (req, res) => {
   if (req.session.user) {
@@ -46,6 +44,5 @@ router.get('/user', authRedirect, isVerified, async (req, res) => {
     }
   )
 })
-
 
 export default router;
