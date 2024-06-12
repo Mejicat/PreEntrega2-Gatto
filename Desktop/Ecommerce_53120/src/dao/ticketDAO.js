@@ -1,6 +1,22 @@
 import ticketModel from './models/ticketModel.js'
 
 class TicketDAO {
+  static instance = null;
+
+  constructor() {
+      if (!TicketDAO.instance) {
+        TicketDAO.instance = this;
+      }
+      return TicketDAO.instance;
+  }
+
+  static getInstance() {
+      if (!TicketDAO.instance) {
+        TicketDAO.instance = new TicketDAO();
+      }
+      return TicketDAO.instance;
+  }
+
   async getTickets() {
     try {
       const tickets = await ticketModel.find().populate('purchaser').populate('products.product').lean()
@@ -38,4 +54,4 @@ class TicketDAO {
   }
 }
 
-export default new TicketDAO()
+export default TicketDAO.getInstance();

@@ -1,6 +1,21 @@
 import messageModel from './models/messageModel.js'
 
 class MessageDAO {
+    static instance = null;
+
+    constructor() {
+        if (!MessageDAO.instance) {
+            MessageDAO.instance = this;
+        }
+        return MessageDAO.instance;
+    }
+
+    static getInstance() {
+        if (!MessageDAO.instance) {
+            MessageDAO.instance = new MessageDAO();
+        }
+        return MessageDAO.instance;
+    }
     
     async createMessage(data) {
         const  {user, message} = data;
@@ -10,25 +25,12 @@ class MessageDAO {
 
         try { 
             await messageModel.create({ user, message: messageContent }) //crea el doc. en la DB
-            return await this.getAllMessages ()
+            return await getAllMessages ()
         } catch (error) {
             console.error(error.message)
             throw new Error('Error al crear el mensaje')
         }
     }
-
-    // CÓDIGO VIEJO PARA MESSAGE
-    /*
-     async createMessage(user, messageContent) {
-        try { 
-            const newMessage = await messageModel.create({ user, message: messageContent }) //crea el doc. en la DB
-            return newMessage
-        } catch (error) {
-            console.error(error.message)
-            throw new Error('Error al crear el mensaje')
-        }
-    }
-    */
 
     async getAllMessages() { //obtiene todos los mensajes
         try {
@@ -40,4 +42,4 @@ class MessageDAO {
     }
 }
 
-export default MessageDAO
+export default MessageDAO.getInstance();

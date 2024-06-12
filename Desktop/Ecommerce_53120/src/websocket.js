@@ -1,17 +1,13 @@
 import ProductDAO from "./dao/productDAO.js"
 import MessageDAO from "./dao/messageDAO.js"
 
-const ProductService = new ProductDAO()
-const MessageService = new MessageDAO()
-
 export default (io) => {
     io.on("connection", (socket) => {
 
         socket.on("createProduct", async (data) => {
-
             try {
-                await ProductService.createProduct(data);
-                const products = await ProductService.getAllProducts();
+                await ProductDAO.createProduct(data);
+                const products = await ProductDAO.getAllProducts();
                 socket.emit("publishProducts", products);
             } catch (error) {
                 socket.emit("statusError", error.message);
@@ -20,7 +16,7 @@ export default (io) => {
 
         socket.on("deleteProduct", async (data) => {
             try {
-                const result = await ProductService.deleteProduct(data.pid);
+                const result = await ProductDAO.deleteProduct(data.pid);
                 socket.emit("publishProducts", result);
             } catch (error) {
                 socket.emit("statusError", error.message);
@@ -29,8 +25,9 @@ export default (io) => {
 
         socket.on("createMessage", async (data) => {
             try {
-                await MessageService.createMessage(data.user, data.message)
-                const messages = await MessageService.getAllMessages()
+                // Utiliza los métodos de MessageDAO directamente
+                await MessageDAO.createMessage(data.user, data.message)
+                const messages = await MessageDAO.getAllMessages()
                 io.emit("publishMessages", messages)
             } catch (error) {
                 socket.emit("statusError", error.message)
@@ -43,3 +40,4 @@ export default (io) => {
         })
     });
 };
+

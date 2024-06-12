@@ -3,16 +3,21 @@ import jwt from "jsonwebtoken"
 import { isValidPassword } from "../utils/bcrypt.js"
 import userModel from "./models/userModel.js"
 
-export default class UserDAO {
-
-  constructor() { }
+class UserDAO {
+  static instance = null;
+  
+  constructor() {
+    if (!UserDAO.instance) {
+      UserDAO.instance = this;
+    }
+    return UserDAO.instance;
+  }
 
   static getInstance() {
     if (!UserDAO.instance) {
-      UserDAO.instance = new UserDAO()
-      UserDAO.instance.userModel = userModel()
+      UserDAO.instance = new UserDAO();
     }
-    return UserDAO.instance
+    return UserDAO.instance;
   }
 
   async getAllUsers() {
@@ -105,7 +110,7 @@ export default class UserDAO {
 
   async verifyUser(userId) {
     try {
-      const user = await userModel.findByIdAndUpdate(userId, {verified: true}, {new: true})
+      const user = await userModel.findByIdAndUpdate(userId, { verified: true }, { new: true })
       return user
     } catch (error) {
       throw error
@@ -122,3 +127,5 @@ export default class UserDAO {
     }
   }
 }
+
+export default UserDAO.getInstance();
