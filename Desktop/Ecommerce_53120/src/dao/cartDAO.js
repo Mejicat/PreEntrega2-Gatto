@@ -130,4 +130,4 @@ class CartDAO {
     }
 }
 
-export default CartDAO.getInstance();
+export default CartDAO;

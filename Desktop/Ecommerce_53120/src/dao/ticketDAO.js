@@ -54,4 +54,4 @@ class TicketDAO {
   }
 }
 
-export default TicketDAO.getInstance();
+export default TicketDAO;

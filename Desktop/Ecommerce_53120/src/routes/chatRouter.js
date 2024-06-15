@@ -2,11 +2,10 @@ import { Router } from "express";
 
 import MessageService from "../services/messageService.js";
 import auth from "../middlewares/auth.js";
-import isVerified from "../middlewares/isVerified.js";
 
 const router = Router()
 
-router.get("/", auth, isVerified, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   try {
     const messages = await MessageService.getMessages()
     res.render(

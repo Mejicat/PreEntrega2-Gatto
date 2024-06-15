@@ -22,7 +22,7 @@ class UserDAO {
 
   async getAllUsers() {
     try {
-      return await this.userModel.find({}).populate('cart').populate('cart.products.product')
+      return await userModel.find({}).lean()
     } catch (error) {
       console.error("Error al obtener usuario:", error)
       throw new Error("Error al consultar usuarios")
@@ -31,7 +31,7 @@ class UserDAO {
 
   async getUserById(uid) {
     try {
-      return await this.userModel.find({ _id: uid }).populate('cart').populate('cart.products.product')
+      return await userModel.find({ _id: uid }).lean()
     } catch (error) {
       console.error("Error al obtener usuario:", error)
       throw new Error("Usuario inexistente")
@@ -55,7 +55,7 @@ class UserDAO {
     }
 
     try {
-      let newUser = await this.userModel.create({
+      let newUser = await userModel.create({
         first_name: first_name || '',
         last_name: last_name || '',
         email,
@@ -80,7 +80,7 @@ class UserDAO {
     }
 
     try {
-      const user = await this.userModel.findOne({ email }).lean()
+      const user = await userModel.findOne({ email }).lean()
 
       if (!user) throw new Error("Credenciales inválidas")
 
@@ -100,7 +100,7 @@ class UserDAO {
 
   async updateUser(userId, cartId) {
     try {
-      const result = await this.userModel.findByIdAndUpdate(userId, { cart: cartId })
+      const result = await userModel.findByIdAndUpdate(userId, { cart: cartId })
       return result
     } catch (error) {
       console.error("Error al actualizar usuario:", error)
@@ -119,7 +119,7 @@ class UserDAO {
 
   async findUserEmail(email) {
     try {
-      const result = await this.userModel.findOne({ email: email })
+      const result = await userModel.findOne({ email: email })
       return result
     } catch (error) {
       console.error("Error al buscar usuario por email:", error)
@@ -128,4 +128,4 @@ class UserDAO {
   }
 }
 
-export default UserDAO.getInstance();
+export default UserDAO;

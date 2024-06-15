@@ -1,10 +1,10 @@
-import UserDAO from "../dao/userDAO.js";
+import {userRepository} from "../repositories/index.js" ;
 import UserDTO from "../dao/dto/userDTO.js";
 
 class UserService {
     async getUsers() {
         try {
-          const users = await UserDAO.getUsers()
+          const users = await userRepository.getUsers()
           if (!users) {
             throw new Error("No users found")
           }
@@ -16,7 +16,7 @@ class UserService {
     
       async getUserById(userId) {
         try {
-          const user = await UserDAO.getUserById(userId)
+          const user = await userRepository.getUserById(userId)
           if (!user) {
             throw new Error("User not found")
           }
@@ -28,7 +28,7 @@ class UserService {
     
       async registerUser(user) {
         try {
-          const newUser = await UserDAO.registerUser(user)
+          const newUser = await userRepository.registerUser(user)
           if (!newUser) {
             throw new Error("Error registering user")
           }
@@ -40,7 +40,7 @@ class UserService {
     
       async verifyUser(userId) {
         try {
-          const user = await UserDAO.verifyUser(userId);
+          const user = await userRepository.verifyUser(userId);
           if (!user) {
             throw new Error("Error al verificar al usuario")
           }
@@ -52,7 +52,7 @@ class UserService {
     
       async updateUser(userId, cartId) {
         try {
-          const user = await UserDAO.updateUser(userId, cartId);
+          const user = await userRepository.updateUser(userId, cartId);
           if (!user) {
             throw new Error("Error al actualizar al usuario");
           }
@@ -64,7 +64,7 @@ class UserService {
     
       async findUserEmail(email) {
         try {
-          const user = await UserDAO.findUserEmail(email);
+          const user = await userRepository.findUserEmail(email);
           if (user) {
             return new UserDTO(user);
           } else {

@@ -1,14 +1,14 @@
-import CartDAO from "../dao/cartDAO.js";
+import { cartRepository } from "../repositories/index.js" ;
 import CartDTO from "../dao/dto/cartDTO.js";
 
 class CartService {
     async addCart(userId) {
         try {
-          const cart = await CartDAO.getCartWithUserId(userId)
+          const cart = await cartRepository.getCartWithUserId(userId)
           if (cart) {
             return new CartDTO(cart)
           }
-          const newCart = await CartDAO.addCart(userId)
+          const newCart = await cartRepository.addCart(userId)
           if (!newCart) {
             throw new Error('Error creating cart')
           }
@@ -20,7 +20,7 @@ class CartService {
     
       async getCart(id) {
         try {
-          const cart = await CartDAO.getCart(id)
+          const cart = await cartRepository.getCart(id)
           return new CartDTO(cart)
         } catch (error) {
           throw error
@@ -29,7 +29,7 @@ class CartService {
     
       async getCartWithUserId(userId) {
         try {
-          const cart = await CartDAO.getCartWithUserId(userId)
+          const cart = await cartRepository.getCartWithUserId(userId)
           return new CartDTO(cart)
         } catch (error) {
           throw error
@@ -38,7 +38,7 @@ class CartService {
     
       async getAllCarts() {
         try {
-          const carts = await CartDAO.getAllCarts()
+          const carts = await cartRepository.getAllCarts()
           if (!carts) {
             throw new Error('No carts found')
           }
@@ -50,7 +50,7 @@ class CartService {
     
       async updateProductQuantity(cartId, productId, quantity) {
         try {
-          const cart = await CartDAO.updateProductQuantity(cartId, productId, quantity)
+          const cart = await cartRepository.updateProductQuantity(cartId, productId, quantity)
           if (!cart) {
             throw new Error('Error updating product quantity')
           }
@@ -62,7 +62,7 @@ class CartService {
     
       async addProductToCart(cartId, productId, quantity) {
         try {
-          const cart = await CartDAO.addProductToCart(cartId, productId, quantity)
+          const cart = await cartRepository.addProductToCart(cartId, productId, quantity)
           if (!cart) {
             throw new Error('Error adding product to cart')
           }
@@ -74,7 +74,7 @@ class CartService {
     
       async deleteProductFromCart(cartId, productId) {
         try {
-          const cart = CartDAO.deleteProductFromCart(cartId, productId)
+          const cart = cartRepository.deleteProductFromCart(cartId, productId)
           if (!cart) {
             throw new Error('Error deleting product from cart')
           }
@@ -86,7 +86,7 @@ class CartService {
       
       async deleteAllProductsFromCart(cartId) {
         try {
-          const cart = CartDAO.deleteAllProductsFromCart(cartId)
+          const cart = cartRepository.deleteAllProductsFromCart(cartId)
           if (!cart) {
             throw new Error('Error deleting products from cart')
           }
@@ -98,7 +98,7 @@ class CartService {
       
       async deleteCart(id) {
         try {
-          const cart = await CartDAO.deleteCart(id)
+          const cart = await cartRepository.deleteCart(id)
           if (!cart) {
             throw new Error('Error deleting cart')
           }

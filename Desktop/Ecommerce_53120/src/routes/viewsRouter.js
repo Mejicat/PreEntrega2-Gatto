@@ -3,7 +3,6 @@ import {Router} from 'express'
 import logged from "../middlewares/logged.js";
 import CartService from "../services/cartService.js";
 import authRedirect from "../middlewares/authRedirect.js";
-import isVerified from "../middlewares/isVerified.js";
 
 const router = Router()
 
@@ -32,7 +31,7 @@ router.get('/register', logged, async (req, res) => {
 })
 
 //Ruta si el usuario está loggeado
-router.get('/user', authRedirect, isVerified, async (req, res) => {
+router.get('/user', authRedirect, async (req, res) => {
   const userId = req.session.user._id
   const cart = await CartService.getCart(userId)
   res.render(

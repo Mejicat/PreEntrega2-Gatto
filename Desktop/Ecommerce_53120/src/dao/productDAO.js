@@ -82,4 +82,4 @@ class ProductDAO {
     }
 }
 
-export default ProductDAO.getInstance();
+export default ProductDAO;

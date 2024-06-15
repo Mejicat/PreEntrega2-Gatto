@@ -3,11 +3,10 @@ import express from 'express';
 import ProductService from "../services/productService.js";
 import auth from "../middlewares/auth.js";
 import isAdmin from "../middlewares/isAdmin.js";
-import isVerified from "../middlewares/isVerified.js";
 
 const router = express.Router();
 
-router.get('/', auth, isVerified, async (req, res) => {
+router.get('/', auth, async (req, res) => {
     const limit = +req.query.limit || 10;
     const page = +req.query.page || 1;
     let { query = null, sort = null } = req.query;
@@ -27,7 +26,7 @@ router.get('/', auth, isVerified, async (req, res) => {
     }
 });
 
-router.get('/:productId', auth, isVerified, async (req, res) => {
+router.get('/:productId', auth, async (req, res) => {
     const productId = req.params.productId;
 
     try {
@@ -38,7 +37,7 @@ router.get('/:productId', auth, isVerified, async (req, res) => {
     }
 });
 
-router.post('/', auth, isVerified, isAdmin, async (req, res) => {
+router.post('/', auth, isAdmin, async (req, res) => {
     const { title, description, code, category, thumbnails } = req.body.product;
     const price = +req.body.product.price;
     const stock = +req.body.product.stock;
@@ -80,7 +79,7 @@ router.post('/', auth, isVerified, isAdmin, async (req, res) => {
     }
 });
 
-router.put('/:productId', auth, isVerified, isAdmin, async (req, res) => {
+router.put('/:productId', auth, isAdmin, async (req, res) => {
     const productId = req.params.productId;
     const productData = req.body;
 
@@ -100,7 +99,7 @@ router.put('/:productId', auth, isVerified, isAdmin, async (req, res) => {
     }
 });
 
-router.delete('/:productId', auth, isVerified, isAdmin, async (req, res) => {
+router.delete('/:productId', auth, isAdmin, async (req, res) => {
     const productId = req.params.productId;
 
     try {

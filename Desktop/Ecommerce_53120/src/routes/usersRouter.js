@@ -5,12 +5,11 @@ import jwt from 'jsonwebtoken';
 import UserService from "../services/userService.js";
 import auth from '../middlewares/auth.js';
 import isAdmin from "../middlewares/isAdmin.js";
-import isVerified from "../middlewares/isVerified.js";
 import { isValidPassword, createHash } from "../utils/bcrypt.js";
 
 const router = Router();
 
-router.get('/current', passport.authenticate("jwt", { session: false }), auth, isVerified, async (req, res, next) => {
+router.get('/current', passport.authenticate("jwt", { session: false }), auth, async (req, res, next) => {
   try {
     const user = await UserService.getUserById(req.user._id);
     res.status(200).send({ status: 'success', message: 'User found', user });
@@ -19,7 +18,7 @@ router.get('/current', passport.authenticate("jwt", { session: false }), auth, i
   }
 });
 
-router.get('/users', passport.authenticate("jwt", { session: false }), isAdmin, auth, isVerified, async (req, res, next) => {
+router.get('/users', passport.authenticate("jwt", { session: false }), isAdmin, auth, async (req, res, next) => {
   try {
     const users = await UserService.getUsers();
     res.status(200).send({ status: 'success', message: 'usuarios encontrados', users });

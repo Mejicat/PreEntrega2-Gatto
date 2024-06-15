@@ -4,10 +4,9 @@ import { uploader } from '../utils/multerUtil.js';
 import ProductService from "../services/productService.js";
 import authRedirect from "../middlewares/authRedirect.js";
 import isAdmin from "../middlewares/isAdmin.js";
-import isVerified from "../middlewares/isVerified.js";
 
 const router = Router()
-router.get('/', authRedirect, isVerified, async (req, res) => {
+router.get('/', authRedirect, async (req, res) => {
     try {
       const limit = +req.query.limit || 10;
       const page = +req.query.page || 1;
@@ -45,7 +44,7 @@ router.get('/', authRedirect, isVerified, async (req, res) => {
     }
   })
   
-  router.get('/add', authRedirect, isVerified, isAdmin, async (req, res) => {
+  router.get('/add', authRedirect, isAdmin, async (req, res) => {
     try {
       res.render(
         "addProduct",
@@ -57,10 +56,10 @@ router.get('/', authRedirect, isVerified, async (req, res) => {
     }
   })
   
-  router.get('/:pid', authRedirect, isVerified, async (req, res) => {
+  router.get('/:pid', authRedirect, async (req, res) => {
     const productId = req.params.pid
     try {
-      const product = await productService.getProductById(productId)
+      const product = await ProductService.getProductById(productId)
       res.render(
         "product",
         {

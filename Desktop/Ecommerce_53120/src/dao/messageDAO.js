@@ -42,4 +42,4 @@ class MessageDAO {
     }
 }
 
-export default MessageDAO.getInstance();
+export default MessageDAO;
