@@ -11,7 +11,7 @@ import cors from 'cors';
 import nodemailer from 'nodemailer';
 import flash from 'connect-flash';
 import compression from 'express-compression';
-import connectToMongo from './dao/connection.js';
+import connectToMongo, { getMongoClient } from './dao/connection.js';
 
 import __dirname from './utils/constantsUtil.js';
 import initializatePassport from './config/passportConfig.js';
@@ -31,7 +31,8 @@ const app = express();
 
 const initializeApp = async () => {
     // Conectar a MongoDB
-    const mongoClient = await connectToMongo();
+    await connectToMongo();
+    const mongoClient = getMongoClient();
 
     // Handlebars Config
     app.engine('handlebars', handlebars.engine());
@@ -139,4 +140,3 @@ const initializeApp = async () => {
 };
 
 initializeApp();
-

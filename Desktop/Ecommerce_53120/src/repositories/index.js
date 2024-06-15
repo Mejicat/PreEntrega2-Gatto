@@ -17,4 +17,3 @@ const initializeRepositories = async () => {
 const repositories = await initializeRepositories();
 
 export const { productRepository, cartRepository, userRepository, ticketRepository } = repositories;
-

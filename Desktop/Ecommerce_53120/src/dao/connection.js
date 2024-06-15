@@ -7,9 +7,11 @@ const uri = process.env.DB_CONNECTION || "mongodb+srv://lucasgatto:tDM2EhNHbMihA
 
 const connectToMongo = async () => {
     await mongoose.connect(uri);
-    return mongoose.connection.getClient();
+    return mongoose.connection;
 };
 
+export const getMongoClient = () => mongoose.connection.getClient();
 export default connectToMongo;
+
 
 
