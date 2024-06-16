@@ -1,4 +1,5 @@
 import {Router} from 'express'
+import passport from 'passport'
 
 import logged from "../middlewares/logged.js";
 import CartService from "../services/cartService.js";
@@ -31,9 +32,9 @@ router.get('/register', logged, async (req, res) => {
 })
 
 //Ruta si el usuario está loggeado
-router.get('/user', authRedirect, async (req, res) => {
-  const userId = req.session.user._id
-  const cart = await CartService.getCart(userId)
+router.get('/user', passport.authenticate("jwt", { session: false }), authRedirect, async (req, res) => {
+  const userId = req.user.id;
+  const cart = await CartService.getCart(userId);
   res.render(
     "user",
     {

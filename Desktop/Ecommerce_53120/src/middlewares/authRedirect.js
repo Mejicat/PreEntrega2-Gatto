@@ -1,8 +1,8 @@
 const authRedirect = (req, res, next) => {
-    if (!req.session.user) {
-      return res.redirect('/views/sessions/login')
-    }
-    return next()
+  if (!req.user) {
+    return res.redirect('/views/sessions/login');
   }
-  
-  export default authRedirect
+  return next();
+};
+
+export default authRedirect;

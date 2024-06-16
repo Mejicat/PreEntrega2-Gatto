@@ -1,8 +1,8 @@
 const auth = (req, res, next) => {
-  if (!req.session.user) {
-    return res.status(401).send({status: 'error', message: 'Usuario no autorizado'})
+  if (!req.user) {
+    return res.status(401).send({ status: 'error', message: 'Usuario no autorizado' });
   }
-  return next()
-}
+  return next();
+};
 
-export default  auth 
+export default auth;

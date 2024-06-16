@@ -24,6 +24,7 @@ import cartsRouter from './routes/cartsRouter.js';
 import viewsRouter from './routes/viewsRouter.js';
 import usersRouter from './routes/usersRouter.js';
 import chatRouter from './routes/chatRouter.js';
+import mockRouter from './routes/mockRouter.js';
 import errorHandler from './middlewares/errors/index.js';
 
 dotenv.config();
@@ -87,6 +88,7 @@ const initializeApp = async () => {
     app.use('/api/users', usersRouter);
     app.use('/api/messages', apiMessageRouter);
     app.use('/api/tickets', apiTicketsRouter);
+    app.use('/api', mockRouter);
 
     // Router vistas de navegación
     app.use('/views/products', productsRouter);

@@ -11,7 +11,7 @@ const router = Router();
 
 router.get('/current', passport.authenticate("jwt", { session: false }), auth, async (req, res, next) => {
   try {
-    const user = await UserService.getUserById(req.user._id);
+    const user = await UserService.getUserById(req.user._id); //Acá obtengo el id del JWT
     res.status(200).send({ status: 'success', message: 'User found', user });
   } catch (error) {
     next(error);

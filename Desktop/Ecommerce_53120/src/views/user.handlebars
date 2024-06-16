@@ -5,15 +5,27 @@
       <div class="items-center text-gray-700">
           <h1 class="text-sm">Age: {{user.age}} </h1>
           <h1 class="text-sm">Rol: {{user.role}} </h1>
-
       </div>
       <div class="flex gap-2.5 py-2">
         {{#if cart.products.length}}
-          <a href="views/carts/{{cart._id}}" class="inline-block flex-1 rounded-lg bg-indigo-500 px-8 py-1 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-indigo-600 focus-visible:ring active:bg-indigo-700 sm:flex-none md:text-base">Mi carrito</a>
+          <a href="/views/carts/{{cart._id}}" class="inline-block flex-1 rounded-lg bg-indigo-500 px-8 py-1 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-indigo-600 focus-visible:ring active:bg-indigo-700 sm:flex-none md:text-base">Mi carrito</a>
         {{/if}}
-        <form action="/api/sessions/logout" method="POST">
-          <button type="submit"  href="#" class="inline-block flex-1 rounded-lg bg-indigo-500 px-8 py-1 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-indigo-600 focus-visible:ring active:bg-indigo-700 sm:flex-none md:text-base">Cerrar Sesión</button>
-        </form>
+        <button id="logoutButton" class="inline-block flex-1 rounded-lg bg-indigo-500 px-8 py-1 text-center text-sm font-semibold text-white outline-none ring-indigo-300 transition duration-100 hover:bg-indigo-600 focus-visible:ring active:bg-indigo-700 sm:flex-none md:text-base">Cerrar Sesión</button>
       </div>
     </div>
 </div>
+
+<script>
+  document.getElementById('logoutButton').addEventListener('click', async function() {
+    try {
+      const response = await axios.post('/api/sessions/logout');
+      if (response.data.status === 'success') {
+        window.location.href = '/login';
+      } else {
+        alert('Logout failed');
+      }
+    } catch (error) {
+      alert('Logout failed');
+    }
+  });
+</script>

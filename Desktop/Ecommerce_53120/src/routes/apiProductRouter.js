@@ -3,10 +3,13 @@ import express from 'express';
 import ProductService from "../services/productService.js";
 import auth from "../middlewares/auth.js";
 import isAdmin from "../middlewares/isAdmin.js";
+import CustomError from '../services/errors/customError.js';
+import { generateProductErrorInfo } from '../services/errors/info.js';
+import { ErrorCodes } from '../services/errors/enums.js';
 
 const router = express.Router();
 
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, async (req, res, next) => {
     const limit = +req.query.limit || 10;
     const page = +req.query.page || 1;
     let { query = null, sort = null } = req.query;
@@ -22,30 +25,32 @@ router.get('/', auth, async (req, res) => {
         const products = await ProductService.getProducts(limit, page, query, sort);
         res.status(200).send({ status: 'success', message: 'productos encontrados', products });
     } catch (error) {
-        res.status(400).send({ status: 'error', message: error.message });
+        next(error);
     }
 });
 
-router.get('/:productId', auth, async (req, res) => {
+router.get('/:productId', auth, async (req, res, next) => {
     const productId = req.params.productId;
 
     try {
         const product = await ProductService.getProductById(productId);
         res.status(200).send({ status: 'success', message: 'producto encontrado', product });
     } catch (error) {
-        res.status(400).send({ status: 'error', message: error.message });
+        next(error);
     }
 });
 
-router.post('/', auth, isAdmin, async (req, res) => {
+router.post('/', auth, isAdmin, async (req, res, next) => {
     const { title, description, code, category, thumbnails } = req.body.product;
     const price = +req.body.product.price;
     const stock = +req.body.product.stock;
 
     if (!title || !description || !code || price == null || stock == null || !category || !thumbnails) {
-        return res.status(400).send({
-            status: 'error',
-            message: 'faltan datos'
+        CustomError.createError({
+            name: 'Product creation error',
+            cause: generateProductErrorInfo(req.body.product),
+            message: 'Faltan datos para crear el producto',
+            code: ErrorCodes.MISSING_DATA_ERROR
         });
     }
 
@@ -75,47 +80,57 @@ router.post('/', auth, isAdmin, async (req, res) => {
         });
         res.status(201).send({ status: 'success', message: 'producto agregado', product });
     } catch (error) {
-        res.status(400).send({ status: 'error', message: error.message });
+        next(error);
     }
 });
 
-router.put('/:productId', auth, isAdmin, async (req, res) => {
+router.put('/:productId', auth, isAdmin, async (req, res, next) => {
     const productId = req.params.productId;
     const productData = req.body;
 
     if (!productData) {
-        return res.status(400).send({ status: 'error', message: 'faltan datos' });
+        CustomError.createError({
+            name: 'Product update error',
+            cause: generateProductErrorInfo(productData),
+            message: 'Faltan datos para actualizar el producto',
+            code: ErrorCodes.MISSING_DATA_ERROR
+        });
     }
 
     if (typeof productData.price !== 'number' || typeof productData.stock !== 'number') {
-        return res.status(400).send({ status: 'error', message: 'price debe ser un número' });
+        CustomError.createError({
+            name: 'Product update error',
+            cause: generateProductErrorInfo(productData),
+            message: 'price y stock deben ser números',
+            code: ErrorCodes.INVALID_TYPES_ERROR
+        });
     }
 
     try {
         const product = await ProductService.updateProduct(productId, productData);
         res.status(200).send({ status: 'success', message: 'producto actualizado', product });
     } catch (error) {
-        res.status(400).send({ status: 'error', message: error.message });
+        next(error);
     }
 });
 
-router.delete('/:productId', auth, isAdmin, async (req, res) => {
+router.delete('/:productId', auth, isAdmin, async (req, res, next) => {
     const productId = req.params.productId;
 
     try {
         const product = await ProductService.deleteProduct(productId);
         res.status(200).send({ status: 'success', message: 'producto eliminado', product });
     } catch (error) {
-        res.status(400).send({ status: 'error', message: error.message });
+        next(error);
     }
 });
 
-router.get('/mockingproducts', async (req, res) => {
+router.get('/mockingproducts', async (req, res, next) => {
     try {
         const mockProducts = generateMockProducts();
         res.status(200).send({ status: 'success', message: 'Mock products generated', products: mockProducts });
     } catch (error) {
-        res.status(500).send({ status: 'error', message: error.message });
+        next(error);
     }
 });
 

@@ -32,7 +32,11 @@ const initializePassport = () => {
       },
       async (jwt_payload, done) => {
         try {
-          return done(null, jwt_payload);
+          const user = await UserService.getUserById(jwt_payload.id);
+          if (user) {
+            return done(null, user);
+          }
+          return done(null, false);
         } catch (error) {
           return done(error);
         }

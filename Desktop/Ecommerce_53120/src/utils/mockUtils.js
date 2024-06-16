@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-const generateMockProducts = (count = 100) => {
+// Función para generar productos de mock
+export const generateMockProducts = (count = 100) => {
   const products = [];
 
   for (let i = 0; i < count; i++) {
@@ -18,5 +19,3 @@ const generateMockProducts = (count = 100) => {
 
   return products;
 };
-
-export default generateMockProducts;
