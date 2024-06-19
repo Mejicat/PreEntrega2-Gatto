@@ -1,6 +1,5 @@
 import { Router } from 'express';
 
-import { uploader } from '../utils/multerUtil.js';
 import ProductService from "../services/productService.js";
 import authRedirect from "../middlewares/authRedirect.js";
 import isAdmin from "../middlewares/isAdmin.js";

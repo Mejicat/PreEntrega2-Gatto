@@ -13,7 +13,7 @@ import flash from 'connect-flash';
 import compression from 'express-compression';
 import connectToMongo, { getMongoClient } from './dao/connection.js';
 
-import __dirname from './utils/constantsUtil.js';
+import __dirname from './utils/constantsUtils.js';
 import initializatePassport from './config/passportConfig.js';
 import apiProductRouter from './routes/apiProductRouter.js';
 import apiCartRouter from './routes/apiCartRouter.js';
@@ -26,6 +26,7 @@ import usersRouter from './routes/usersRouter.js';
 import chatRouter from './routes/chatRouter.js';
 import mockRouter from './routes/mockRouter.js';
 import errorHandler from './middlewares/errors/index.js';
+import { addLogger, startLogger } from './utils/loggerUtils.js';
 
 dotenv.config();
 const app = express();
@@ -66,6 +67,7 @@ const initializeApp = async () => {
     initializatePassport();
     app.use(passport.initialize());
     app.use(passport.session());
+    app.use(addLogger);
 
     // Linkeo al usuario con su carrito
     app.get('/', async (req, res) => {
@@ -133,8 +135,9 @@ const initializeApp = async () => {
     });
 
     const PORT = 8080;
+    
     const httpServer = app.listen(PORT, () => {
-        console.log(`Start server in PORT ${PORT}`);
+        startLogger(`Server Started at ${new Date().toLocaleTimeString()}`);
     });
 
     const io = new Server(httpServer);
