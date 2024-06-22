@@ -29,9 +29,9 @@ class UserDAO {
     }
   }
 
-  async getUserById(uid) {
+  async getUserById(userId) {
     try {
-      return await userModel.find({ _id: uid }).lean()
+      return await userModel.find({ _id: userId }).lean()
     } catch (error) {
       console.error("Error al obtener usuario:", error)
       throw new Error("Usuario inexistente")

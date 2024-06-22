@@ -25,7 +25,7 @@ import viewsRouter from './routes/viewsRouter.js';
 import usersRouter from './routes/usersRouter.js';
 import chatRouter from './routes/chatRouter.js';
 import mockRouter from './routes/mockRouter.js';
-import errorHandler from './middlewares/errors/index.js';
+//import errorHandler from './middlewares/errors/index.js';
 import { addLogger, startLogger } from './utils/loggerUtils.js';
 
 dotenv.config();
@@ -85,12 +85,12 @@ const initializeApp = async () => {
     });
 
     // Router respuesta tradicional / endpoint
-    app.use('/api', apiProductRouter);
-    app.use('/api', apiCartRouter);
+    app.use('/api/products', apiProductRouter);
+    app.use('/api/carts', apiCartRouter);
     app.use('/api/users', usersRouter);
     app.use('/api/messages', apiMessageRouter);
     app.use('/api/tickets', apiTicketsRouter);
-    app.use('/api', mockRouter);
+    app.use('/api/mock', mockRouter);
 
     // Router vistas de navegación
     app.use('/views/products', productsRouter);
@@ -104,7 +104,7 @@ const initializeApp = async () => {
     });
 
     // Manejo de errores
-    app.use(errorHandler);
+    //app.use(errorHandler);
 
     // Envío de e-mail
     const transport = nodemailer.createTransport({

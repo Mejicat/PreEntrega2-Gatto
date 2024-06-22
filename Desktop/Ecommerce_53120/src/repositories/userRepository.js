@@ -31,6 +31,24 @@ class UserRepository {
         throw new Error(error.message);
     }
   }
+
+  async findUserEmail(email) {
+    try {
+        const user = await this.dao.findUserEmail(email)
+        return user;
+    } catch (error) {
+        throw new Error(error.message)
+    }
+  }
+
+  async getUserById(userId) {
+    try {
+      const user = await this.dao.getUserById(userId);
+      return new UserDto(user);
+    } catch (error) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+  }
 }
 
 export default UserRepository;

@@ -22,7 +22,6 @@ class ProductRepository {
             throw new Error(`Product with ID ${pid} not found`);
         }
     }
-    
 
     async addProducts(pid) {
         try {

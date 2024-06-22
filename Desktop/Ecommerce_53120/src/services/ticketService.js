@@ -1,54 +1,90 @@
-import { ticketRepository } from "../repositories/index.js" ;
+import { ticketRepository, cartRepository, productRepository, userRepository } from "../repositories/index.js";
 import TicketDTO from "../dao/dto/ticketDTO.js";
 
 class TicketService {
     async getTickets() {
       try {
-        const tickets = await ticketRepository.getTickets()
+        const tickets = await ticketRepository.getTickets();
         if (!tickets) {
-          throw new Error("No se encontraron tickets")
+          throw new Error("No se encontraron tickets");
         }
-        return tickets.map((ticket) => new TicketDTO(ticket))
+        return tickets.map((ticket) => new TicketDTO(ticket));
       } catch (error) {
-        throw error
+        throw error;
       }
     }
-  
+
     async getTicketById(ticketId) {
       try {
-        const ticket = await ticketRepository.getTicketById(ticketId)
+        const ticket = await ticketRepository.getTicketById(ticketId);
         if (!ticket) {
-          throw new Error("Ticket no encontrado")
+          throw new Error("Ticket no encontrado");
         }
-        return new TicketDTO(ticket)
+        return new TicketDTO(ticket);
       } catch (error) {
-        throw error
+        throw error;
       }
     }
-  
+
     async getTicketsByUserId(userId) {
       try {
-        const tickets = await ticketRepository.getTicketsByUserId(userId)
+        const tickets = await ticketRepository.getTicketsByUserId(userId);
         if (!tickets) {
-          throw new Error("No se encontraron tickets")
+          throw new Error("No se encontraron tickets");
         }
-        return new TicketDTO(tickets)
+        return tickets.map(ticket => new TicketDTO(ticket));
       } catch (error) {
-        throw error
+        throw error;
       }
     }
-  
-    async createTicket(ticket) {
+
+    async createTicket(userId, cartId) {
       try {
-        const newTicket = await ticketRepository.createTicket(ticket)
-        if (!newTicket) {
-          throw new Error("Error al crear el ticket")
+        const user = await userRepository.getUserById(userId);
+        if (!user) {
+          throw new Error("Usuario no encontrado");
         }
-        return new TicketDTO(newTicket)
+
+        const cart = await cartRepository.getCart(cartId);
+        if (!cart) {
+          throw new Error("Carrito no encontrado");
+        }
+
+        let totalAmount = 0;
+        const productsForTicket = [];
+        const remainingProducts = [];
+
+        for (const cartItem of cart.products) {
+          const product = await productRepository.getProductById(cartItem.product._id);
+          if (!product) {
+            throw new Error(`Producto con ID ${cartItem.product._id} no encontrado`);
+          }
+
+          if (cartItem.quantity <= product.stock) {
+            totalAmount += cartItem.quantity * product.price;
+            productsForTicket.push({ product: cartItem.product._id, quantity: cartItem.quantity });
+            await productRepository.updateProduct(product._id, { stock: product.stock - cartItem.quantity });
+          } else {
+            totalAmount += product.stock * product.price;
+            productsForTicket.push({ product: cartItem.product._id, quantity: product.stock });
+            remainingProducts.push({ product: cartItem.product._id, quantity: cartItem.quantity - product.stock });
+            await productRepository.updateProduct(product._id, { stock: 0 });
+          }
+        }
+
+        const newTicket = await ticketRepository.createTicket(user.email, totalAmount, productsForTicket);
+
+        if (remainingProducts.length > 0) {
+          await cartRepository.updateCart(cartId, remainingProducts);
+        } else {
+          await cartRepository.clearCart(cartId);
+        }
+
+        return new TicketDTO(newTicket);
       } catch (error) {
-        throw error
+        throw error;
       }
     }
   }
-  
-  export default new TicketService()
+
+export default new TicketService();

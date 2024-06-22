@@ -17,7 +17,7 @@ class ProductDAO {
         return ProductDAO.instance;
     }
 
-    async getAllProducts(limit, page, query, sort) {
+    async getProducts(limit, page, query, sort) {
         try {
             return await productModel.paginate(query, { limit, page, sort, lean: true });
         } catch (error) {
@@ -26,7 +26,7 @@ class ProductDAO {
         }
     }
 
-    async getProductByID(pid) {
+    async getProductById(pid) {
         try {
             const product = await productModel.findOne({ _id: pid });
 
@@ -39,8 +39,8 @@ class ProductDAO {
         }
     }
 
-    async createProduct(product) {
-        const { title, description, code, price, stock, category, thumbnails } = product;
+    async addProducts(pid) {
+        const { title, description, code, price, stock, category, thumbnails } = pid;
 
         if (!title || !description || !code || !price || !stock || !category) {
             throw new Error('Error al crear el producto');

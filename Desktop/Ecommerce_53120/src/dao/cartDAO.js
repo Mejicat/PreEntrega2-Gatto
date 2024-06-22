@@ -26,16 +26,16 @@ class CartDAO {
         }
     }
 
-    async getCart(id) {
+    async getCart(cid) {
         try {
-            const cart = await cartModel.findById(id).populate('products.product').lean();
+            const cart = await cartModel.findById(cid).populate('products.product').lean();
             if (!cart) {
                 console.error('Carrito no encontrado');
                 return;
             }
             return cart;
         } catch (error) {
-            console.error(error);
+            throw new Error(`Carrito con ID ${cid} no encontrado`);
         }
     }
 
@@ -48,11 +48,12 @@ class CartDAO {
         }
     }
 
-    async updateCart(cartId, products) {
+    async updateCart(cid, products) {
         try {
-            return await cartModel.findByIdAndUpdate(cartId, { products: products });
+            const updatedCart = await cartModel.findByIdAndUpdate(cid, { products }, { new: true });
+            return updatedCart;
         } catch (error) {
-            console.error(error);
+            throw new Error(`No se pudo actualizar el carrito ${cid}`);
         }
     }
 
@@ -110,14 +111,6 @@ class CartDAO {
         }
     }
 
-    async deleteAllProductsFromCart(cartId) {
-        try {
-            await cartModel.findByIdAndUpdate(cartId, { products: [] });
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     async deleteProductFromCart(cartId, productId) {
         try {
             return await cartModel.findOneAndUpdate(
@@ -126,6 +119,15 @@ class CartDAO {
             );
         } catch (error) {
             console.error(error);
+        }
+    }
+
+    async clearCart(cid) {
+        try {
+            const clearedCart = await cartModel.findByIdAndUpdate(cid, { products: [] }, { new: true });
+            return clearedCart;
+        } catch (error) {
+            throw new Error(`No se pudo limpiar el carrito ${cid}`);
         }
     }
 }
