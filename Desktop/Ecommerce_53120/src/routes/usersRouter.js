@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import passport from "passport";
+import jwtAuth from '../middlewares/jwtAuth.js';
 import jwt from 'jsonwebtoken';
 
 import UserService from "../services/userService.js";
@@ -8,24 +9,25 @@ import isAdmin from "../middlewares/isAdmin.js";
 import { isValidPassword, createHash } from "../utils/bcrypt.js";
 
 const router = Router();
+const userService = new UserService();
 
-router.get('/current', passport.authenticate("jwt", { session: false }), auth, async (req, res, next) => {
+router.get('/current', jwtAuth, auth, async (req, res, next) => {
   try {
-    const user = await UserService.getUserById(req.user._id); //Acá obtengo el id del JWT
+    const user = await userService.getUserById(req.user.id); // Acá obtengo el id del JWT
     res.status(200).send({ status: 'success', message: 'User found', user });
   } catch (error) {
     next(error);
   }
-});
+})
 
-router.get('/users', passport.authenticate("jwt", { session: false }), isAdmin, auth, async (req, res, next) => {
+router.get('/users', jwtAuth, auth, isAdmin, async (req, res, next) => {
   try {
-    const users = await UserService.getUsers();
+    const users = await userService.getUsers();
     res.status(200).send({ status: 'success', message: 'usuarios encontrados', users });
   } catch (error) {
     next(error);
   }
-});
+})
 
 router.post('/register', async (req, res, next) => {
   try {
@@ -35,7 +37,7 @@ router.post('/register', async (req, res, next) => {
       return res.status(400).send({ status: "error", message: "Todos los campos son requeridos" });
     }
 
-    const existingUser = await UserService.findUserEmail(email);
+    const existingUser = await userService.findUserEmail(email);
     if (existingUser) {
       return res.status(400).send({ status: "error", message: "El usuario ya existe" });
     }
@@ -48,7 +50,7 @@ router.post('/register', async (req, res, next) => {
       password: createHash(password),
     };
 
-    const registeredUser = await UserService.registerUser(newUser);
+    const registeredUser = await userService.registerUser(newUser);
     res.status(201).send({ status: "success", message: "Usuario registrado", user: registeredUser });
   } catch (error) {
     next(error);
@@ -63,7 +65,7 @@ router.post('/login', async (req, res, next) => {
       return res.status(400).send({ status: "error", message: "Todos los campos son requeridos" });
     }
 
-    const user = await UserService.findUserEmail(email);
+    const user = await userService.findUserEmail(email);
     if (!user || !isValidPassword(user, password)) {
       return res.status(400).send({ status: "error", message: "Credenciales inválidas" });
     }

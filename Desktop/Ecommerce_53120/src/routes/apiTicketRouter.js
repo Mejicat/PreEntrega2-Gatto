@@ -1,15 +1,14 @@
 import { Router } from "express";
-import auth from "../middlewares/auth.js";
+
+import jwtAuth from "../middlewares/jwtAuth.js";
 import isAdmin from "../middlewares/isAdmin.js";
-import ticketService from "../services/ticketService.js";
-import CustomError from '../services/errors/customError.js';
-import { ErrorCodes } from '../services/errors/enums.js';
+import TicketService from "../services/ticketService.js";
 
 const router = Router();
 
-router.get('/', auth, isAdmin, async (req, res, next) => {
+router.get('/', jwtAuth, isAdmin, async (req, res, next) => {
   try {
-    const tickets = await ticketService.getTickets();
+    const tickets = await TicketService.getAllTickets();
     res.status(200).send({ status: 'success', message: 'tickets encontrados', tickets });
   } catch (error) {
     next(error);
@@ -17,3 +16,4 @@ router.get('/', auth, isAdmin, async (req, res, next) => {
 });
 
 export default router;
+

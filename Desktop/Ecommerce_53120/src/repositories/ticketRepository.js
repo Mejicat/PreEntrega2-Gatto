@@ -5,6 +5,14 @@ class TicketRepository {
         this.dao = dao;
     }
 
+    async getTickets() {
+        try {
+          return await ticketModel.find();
+        } catch (error) {
+          throw error;
+        }
+      }
+    
     async createTicket(email, amount, products) {
         try {
             const ticket = await this.dao.createTicket({

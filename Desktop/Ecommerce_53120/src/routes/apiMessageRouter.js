@@ -1,11 +1,11 @@
 import { Router } from "express";
 
 import MessageService from "../services/messageService.js";
-import auth from "../middlewares/auth.js";
+import jwtAuth from "../middlewares/jwtAuth.js";
 
 const router = Router();
 
-router.get("/", auth, async (req, res) => {
+router.get("/", jwtAuth, async (req, res) => {
   try {
     const messages = await MessageService.getMessages();
     res.status(200).send({ status: "success", messages });
@@ -14,14 +14,14 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.post("/", auth, async (req, res) => {
+router.post("/", jwtAuth, async (req, res) => {
   const { message } = req.body;
-  const {email, firstName} = req.session.user;
+  const { email, firstName } = req.user;
 
   if (!email || !firstName) {
     return res.status(400).send({ status: "error", message: "falta el usuario" });
   }
- 
+
   if (!message) {
     return res.status(400).send({ status: "error", message: "falta el mensaje" });
   }

@@ -50,9 +50,9 @@ class CartRepository {
         }
     }
 
-    async deleteProduct(cid, pid) {
+    async deleteProductFromCart(cid, pid) {
         try {
-            const results = await this.dao.deleteProduct(cid, pid);
+            const results = await this.dao.deleteProductFromCart(cid, pid);
             return new CartDto(results);
         } catch (error) {
             throw new Error(`No se pudo eliminar el producto ${pid} del carrito`);

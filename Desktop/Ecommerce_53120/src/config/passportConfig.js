@@ -8,6 +8,8 @@ import UserService from "../services/userService.js";
 
 dotenv.config();
 
+const userService = new UserService();
+
 const JWTStrategy = jwt.Strategy;
 
 const initializePassport = () => {
@@ -32,7 +34,7 @@ const initializePassport = () => {
       },
       async (jwt_payload, done) => {
         try {
-          const user = await UserService.getUserById(jwt_payload.id);
+          const user = await userService.getUserById(jwt_payload.id);
           if (user) {
             return done(null, user);
           }
@@ -62,7 +64,7 @@ const initializePassport = () => {
               age: 18, // Propongo 18 de default, para no tener problema con la restricción colocada en Users
               password: '' // GitHub no proporciona contraseñas
             };
-            const registeredUser = await UserService.registerUser(newUser);
+            const registeredUser = await userService.registerUser(newUser);
             done(null, registeredUser);
           } else {
             done(null, user);
@@ -77,7 +79,7 @@ const initializePassport = () => {
   passport.serializeUser((user, done) => done(null, user._id));
 
   passport.deserializeUser(async (id, done) => {
-    const user = await UserService.getUserById(id);
+    const user = await userService.getUserById(id);
     done(null, user);
   });
 };

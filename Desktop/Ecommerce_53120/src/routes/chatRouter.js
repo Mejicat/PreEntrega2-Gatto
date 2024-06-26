@@ -1,21 +1,18 @@
 import { Router } from "express";
 
+import jwtAuth from "../middlewares/jwtAuth.js";
 import MessageService from "../services/messageService.js";
 import auth from "../middlewares/auth.js";
 
 const router = Router()
 
-router.get("/", auth, async (req, res) => {
+router.get("/", jwtAuth, async (req, res) => {
   try {
-    const messages = await MessageService.getMessages()
-    res.render(
-      "chat", 
-      { 
-        messages: messages
-      })
+    const messages = await MessageService.getMessages();
+    res.render("chat", { messages });
   } catch (error) {
-    res.status(400).send({ status: "error", message: error.message })
+    res.status(400).send({ status: "error", message: error.message });
   }
-})
+});
 
 export default router;

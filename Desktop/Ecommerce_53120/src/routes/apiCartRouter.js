@@ -1,34 +1,35 @@
-import  { Router } from "express";
+import { Router } from "express";
 
+import jwtAuth from '../middlewares/jwtAuth.js';
+import auth from "../middlewares/auth.js";
 import CartService from "../services/cartService.js";
 import ProductService from "../services/productService.js";
 import TicketService from "../services/ticketService.js";
-import auth from "../middlewares/auth.js";
 import isAdmin from "../middlewares/isAdmin.js";
 
 const router = Router();
 
-router.post('/', auth, async (req, res) => {
-  const userId = req.session.user._id
+router.post('/', jwtAuth, auth, async (req, res) => {
+  const userId = req.user._id;
 
   try {
     const cart = await CartService.addCart(userId);
-    res.status(201).send({status:'success', message:'carrito creado', cart});
-  } catch (error){
-    res.status(400).send({status:'error', message: error.message})
+    res.status(201).send({ status: 'success', message: 'carrito creado', cart });
+  } catch (error) {
+    res.status(400).send({ status: 'error', message: error.message });
   }
-})
+});
 
-router.get('/:cid', auth, isAdmin, async (req, res) => {
+router.get('/:cid', jwtAuth, auth, isAdmin, async (req, res) => {
   const cartId = req.params.cid;
 
   try {
     const cart = await CartService.getCart(cartId);
-    res.status(200).send({status:'success', message:'carrito encontrado', cart});
+    res.status(200).send({ status: 'success', message: 'carrito encontrado', cart });
   } catch (error) {
-    res.status(400).send({status:'error', message: error.message})
+    res.status(400).send({ status: 'error', message: error.message });
   }
-})
+});
 
 router.get('/', auth, isAdmin, async (req, res) => {
   try {
@@ -39,10 +40,10 @@ router.get('/', auth, isAdmin, async (req, res) => {
   }
 })
 
-router.post('/:cid/products/:pid', auth, async (req, res) => {
+router.post('/:cid/products/:pid', jwtAuth, auth, async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
-  const userId = req.session.user._id;
+  const userId = req.user._id;
 
   try {
     const cart = await CartService.getCart(cartId);
@@ -65,11 +66,11 @@ router.post('/:cid/products/:pid', auth, async (req, res) => {
   }
 })
 
-router.put('/:cid/products/:pid', auth, async (req, res) => {
-  const cartId = req.params.cid
-  const productId = req.params.pid
+router.put('/:cid/products/:pid', jwtAuth, auth, async (req, res) => {
+  const cartId = req.params.cid;
+  const productId = req.params.pid;
   const quantity = +req.body.quantity;
-  const userId = req.session.user._id;
+  const userId = req.user._id;
   
   try {
     const cart = await CartService.getCart(cartId);
@@ -81,16 +82,16 @@ router.put('/:cid/products/:pid', auth, async (req, res) => {
       return res.status(400).send({ status: 'error', error: 'Invalid quantity' });
     }
 
-    const response = await CartService.updateProductQuantity(cartId, productId, quantity)
+    const response = await CartService.updateProductQuantity(cartId, productId, quantity);
     res.status(200).send({status:'success', message:'cantidad de producto actualizada', response});
   } catch (error) {
     res.status(400).send({status:'error', message: error.message})
   }
 })
 
-router.delete("/:cid", auth, async (req, res) => {
+router.delete("/:cid", jwtAuth, auth, async (req, res) => {
   const cartId = req.params.cid;
-  const userId = req.session.user._id;
+  const userId = req.user._id;
 
   try {
     const cart = await CartService.getCart(cartId);
@@ -105,10 +106,10 @@ router.delete("/:cid", auth, async (req, res) => {
   }
 })
 
-router.delete("/:cid/products/:pid", auth, async (req, res) => {
+router.delete("/:cid/products/:pid", jwtAuth, auth, async (req, res) => {
   const cartId = req.params.cid;
-  const productId = req.params.pid
-  const userId = req.session.user._id;
+  const productId = req.params.pid;
+  const userId = req.user._id;
 
   try {
     const cart = await CartService.getCart(cartId);
@@ -116,24 +117,24 @@ router.delete("/:cid/products/:pid", auth, async (req, res) => {
       return res.status(401).send({status:'error', message:'No tienes permisos para eliminar productos de este carrito'})
     }
     
-    const deletedCart = await CartService.deleteProductFromCart(cartId, productId)
+    const deletedCart = await CartService.deleteProductFromCart(cartId, productId);
     res.status(200).send({status:'success', message:`producto eliminado del carrito`});
   } catch (error) {
     res.status(400).send({status:'error', message: error.message})
   }
 })
 
-router.post('/:cid/purchase', auth, async (req, res) => {
+router.post('/:cid/purchase', jwtAuth, auth, async (req, res) => {
   const cartId = req.params.cid;
-  const userId = req.session.user._id;
+  const userId = req.user._id;
 
   try {
     const cart = await CartService.getCart(cartId);
-      if (cart.user._id.toString() !== userId) {
-      return res.status(401).send({status:'error', message:'No tienes permisos para comprar este carrito'})
+    if (cart.user._id.toString() !== userId) {
+      return res.status(401).send({status:'error', message:'No tienes permisos para comprar este carrito'});
     }
     if (!cart.products.length) {
-      return res.status(400).send({status:'error', message:'No hay productos en el carrito'})
+      return res.status(400).send({status:'error', message:'No hay productos en el carrito'});
     }
 
     let itemsRemoved = [];
@@ -151,13 +152,12 @@ router.post('/:cid/purchase', auth, async (req, res) => {
       totalAmount += item.product.price * item.quantity;
     }
 
-
     for (let item of currentCart.products) {
       await ProductService.updateProduct(item.product._id, { stock: item.product.stock - item.quantity });
     }
 
     let code = 0;
-    let tickets = await TicketService.getTickets();
+    let tickets = await TicketService.getAllTickets(); // Cambiar getTickets a getAllTickets en ticketService
     if (tickets.length) {
       code = +tickets[tickets.length - 1].code + 1;
     }
@@ -179,5 +179,6 @@ router.post('/:cid/purchase', auth, async (req, res) => {
   }
 })
 
-export default router
+export default router;
+
 
