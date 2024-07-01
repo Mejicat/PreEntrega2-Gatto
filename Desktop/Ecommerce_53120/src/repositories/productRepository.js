@@ -23,9 +23,9 @@ class ProductRepository {
         }
     }
 
-    async addProducts(pid) {
+    async addProducts(pid, user) {
         try {
-            const product = await this.dao.addProducts(pid);        
+            const product = await this.dao.addProducts(pid, user);        
             return new ProductDto(product);
         } catch (error) {
              throw new Error(`Could not add this Product ${pid}`);

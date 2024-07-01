@@ -1,4 +1,4 @@
-import  productModel from './models/productModel.js';
+import productModel from './models/productModel.js';
 
 class ProductDAO {
     static instance = null;
@@ -39,7 +39,7 @@ class ProductDAO {
         }
     }
 
-    async addProducts(pid) {
+    async addProducts(pid, user) {
         const { title, description, code, price, stock, category, thumbnails } = pid;
 
         if (!title || !description || !code || !price || !stock || !category) {
@@ -47,7 +47,8 @@ class ProductDAO {
         }
 
         try {
-            const result = await productModel.create({ title, description, code, price, stock, category, thumbnails: thumbnails ?? [] });
+            const owner = user.role === 'premium' ? user.email : 'admin';
+            const result = await productModel.create({ title, description, code, price, stock, category, thumbnails: thumbnails ?? [], owner });
             return result;
         } catch (error) {
             console.error(`Error al crear el producto: ${error.message}`);

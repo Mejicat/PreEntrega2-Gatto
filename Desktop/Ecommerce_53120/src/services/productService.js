@@ -4,15 +4,11 @@ import ProductDTO from "../dao/dto/productDTO.js";
 class ProductService {
 
     async getProducts(limit, page, query, sort) {
-        try {
-            const products = await productRepository.getAllProducts(limit, page, query, sort);
-            if (!products) {
-                throw new Error("No se encontraron productos");
-            }
-            return products;
-        } catch (error) {
-            throw error;
+        const products = await productRepository.getAllProducts(limit, page, query, sort);
+        if (!products) {
+            throw new Error("No se encontraron productos");
         }
+        return products;
     }
 
     async getProductById(id) {
@@ -27,9 +23,9 @@ class ProductService {
         }
     }
 
-    async addProduct(productData) {
+    async addProduct(productData, user) {
         try {
-            const product = await productRepository.createProduct(productData);
+            const product = await productRepository.createProduct(productData, user);
             if (!product) {
                 throw new Error("Error al agregar producto");
             }

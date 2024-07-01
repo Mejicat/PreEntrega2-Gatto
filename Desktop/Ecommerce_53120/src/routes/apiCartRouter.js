@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import jwtAuth from '../middlewares/jwtAuth.js';
 import auth from "../middlewares/auth.js";
+import checkProductOwnership from "../middlewares/checkProductOwnership.js";
 import CartService from "../services/cartService.js";
 import ProductService from "../services/productService.js";
 import TicketService from "../services/ticketService.js";
@@ -16,7 +17,7 @@ router.post('/', jwtAuth, auth, async (req, res) => {
     const cart = await CartService.addCart(userId);
     res.status(201).send({ status: 'success', message: 'carrito creado', cart });
   } catch (error) {
-    res.status(400).send({ status: 'error', message: error.message });
+    next(error);
   }
 });
 
@@ -40,7 +41,7 @@ router.get('/', auth, isAdmin, async (req, res) => {
   }
 })
 
-router.post('/:cid/products/:pid', jwtAuth, auth, async (req, res) => {
+router.post('/:cid/products/:pid', jwtAuth, auth, checkProductOwnership, async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const userId = req.user._id;

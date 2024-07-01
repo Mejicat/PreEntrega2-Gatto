@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import passport from "passport";
+import nodemailer from 'nodemailer';
 import jwtAuth from '../middlewares/jwtAuth.js';
 import jwt from 'jsonwebtoken';
 
@@ -10,6 +11,16 @@ import { isValidPassword, createHash } from "../utils/bcrypt.js";
 
 const router = Router();
 const userService = new UserService();
+
+const JWT_SECRET = process.env.JWT_SECRET || "coderSecret";
+const transport = nodemailer.createTransport({
+    service: 'gmail',
+    port: 587,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 router.get('/current', jwtAuth, auth, async (req, res, next) => {
   try {
@@ -126,6 +137,85 @@ router.post('/', (req, res) => {
   users.push(newUser);
 
   res.send({ status: 'success', payload: newUser });
+});
+
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  const user = await userService.findUserEmail(email);
+  if (!user) {
+      return res.status(400).send({ status: "error", message: "Usuario no encontrado" });
+  }
+
+  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
+  const resetLink = `http://localhost:8080/reset-password?token=${token}`;
+
+  await transport.sendMail({
+      from: 'Lucas Gatto <lucas.gatto@recargapay.com>',
+      to: email,
+      subject: 'Restablecimiento de Contraseña',
+      html: `<div>
+                <h1>Restablecimiento de Contraseña</h1>
+                <p>Para restablecer su contraseña, haga clic en el siguiente enlace:</p>
+                <a href="${resetLink}">Restablecer Contraseña</a>
+             </div>`
+  });
+
+  res.send({ status: 'success', message: 'Correo de restablecimiento enviado' });
+});
+
+router.get('/reset-password', async (req, res) => {
+  const { token } = req.query;
+
+  try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      res.render('reset-password', { token });
+  } catch (error) {
+      res.status(400).send({ status: 'error', message: 'Token inválido o expirado' });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const user = await userService.getUserById(decoded.id);
+
+      if (isValidPassword(user, newPassword)) {
+          return res.status(400).send({ status: 'error', message: 'La nueva contraseña no puede ser la misma que la anterior' });
+      }
+
+      const hashedPassword = createHash(newPassword);
+      await userService.updateUserPassword(decoded.id, hashedPassword);
+
+      res.send({ status: 'success', message: 'Contraseña restablecida con éxito' });
+  } catch (error) {
+      res.status(400).send({ status: 'error', message: 'Token inválido o expirado' });
+  }
+});
+
+router.get('/premium/:uid', auth, async (req, res) => {
+  const user = await UserService.getUser(req.params.uid);
+  const roles = ['usuario', 'premium'];
+  
+  if (user.role === 'premium' || user.role === 'usuario') {
+      res.render('switchRole', { title: 'Role Switcher', user: user, role: roles });
+  }else{
+      res.status(401).json({ error: 'Unauthorized', message: 'No tienes permiso de acceso' });
+  }
+});
+
+router.put('/premium/:uid', async (req, res) => {
+  const uid = req.params.uid;
+  const newRole = req.body.role;
+
+  try {
+    await UserService.updateRole(uid, newRole);
+    res.status(200).send("Rol actualizado exitosamente.");
+  } catch (error) {
+    res.status(500).send("Error actualizando el rol");
+  }
 });
 
 export default router;

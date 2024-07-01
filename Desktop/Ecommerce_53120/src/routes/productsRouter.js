@@ -2,7 +2,8 @@ import { Router } from 'express';
 
 import ProductService from "../services/productService.js";
 import authRedirect from "../middlewares/authRedirect.js";
-import isAdmin from "../middlewares/isAdmin.js";
+import isPremium from "../middlewares/isPremium.js";
+import checkPremiumOwner from "../middlewares/checkPremiumOwner.js";
 
 const router = Router()
 router.get('/', authRedirect, async (req, res) => {
@@ -43,7 +44,7 @@ router.get('/', authRedirect, async (req, res) => {
     }
   })
   
-  router.get('/add', authRedirect, isAdmin, async (req, res) => {
+  router.get('/add', authRedirect, isPremium, async (req, res) => {
     try {
       res.render(
         "addProduct",
@@ -54,6 +55,17 @@ router.get('/', authRedirect, async (req, res) => {
       res.status(400).send({status: 'error', message: error.message})
     }
   })
+
+  router.post('/add', authRedirect, isPremium, async (req, res) => {
+    const productData = req.body;
+    try {
+      const user = req.user;
+      const product = await ProductService.addProduct(productData, user);
+      res.status(201).send({ status: 'success', message: 'Producto agregado', product });
+    } catch (error) {
+      res.status(400).send({ status: 'error', message: error.message });
+    }
+  });
   
   router.get('/:pid', authRedirect, async (req, res) => {
     const productId = req.params.pid
@@ -69,5 +81,15 @@ router.get('/', authRedirect, async (req, res) => {
       res.status(400).send({status: 'error', message: error.message})
     }
   })
+
+  router.delete('/:pid', authRedirect, checkPremiumOwner, async (req, res) => {
+    const productId = req.params.pid;
+    try {
+        await ProductService.deleteProduct(productId);
+        res.status(200).send({ status: 'success', message: 'Producto eliminado con éxito' });
+    } catch (error) {
+        res.status(400).send({ status: 'error', message: error.message });
+    }
+});
   
   export default router

@@ -37,6 +37,10 @@ const productSchema = mongoose.Schema({
         type: Array,
         required: false,
         default: []
+    },
+    owner: {
+        type: String,
+        require: true
     }
 })
 

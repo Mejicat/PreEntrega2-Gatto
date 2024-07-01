@@ -3,20 +3,16 @@ import CartDTO from "../dao/dto/cartDTO.js";
 
 class CartService {
     async addCart(userId) {
-        try {
-          const cart = await cartRepository.getCartWithUserId(userId)
-          if (cart) {
-            return new CartDTO(cart)
-          }
-          const newCart = await cartRepository.addCart(userId)
-          if (!newCart) {
-            throw new Error('Error creating cart')
-          }
-          return new CartDTO(newCart)
-        } catch (error) {
-          throw error
-        }
+      const cart = await cartRepository.getCartWithUserId(userId);
+      if (cart) {
+          return new CartDTO(cart);
       }
+      const newCart = await cartRepository.addCart(userId);
+      if (!newCart) {
+          throw new Error('Error creating cart');
+      }
+      return new CartDTO(newCart);
+  }
     
       async getCart(id) {
         try {

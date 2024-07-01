@@ -74,6 +74,11 @@ class UserService {
           throw error
         }
       }
+
+      async updateUserPassword(id, newPassword) {
+        return await userRepository.findByIdAndUpdate(id, { password: newPassword });
+    }
+
     }
 
 export default UserService
