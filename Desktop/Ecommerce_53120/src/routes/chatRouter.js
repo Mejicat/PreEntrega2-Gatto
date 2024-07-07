@@ -2,7 +2,6 @@ import { Router } from "express";
 
 import jwtAuth from "../middlewares/jwtAuth.js";
 import MessageService from "../services/messageService.js";
-import auth from "../middlewares/auth.js";
 
 const router = Router()
 

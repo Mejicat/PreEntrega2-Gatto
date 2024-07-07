@@ -20,12 +20,12 @@ class UserDAO {
     return UserDAO.instance;
   }
 
-  async getAllUsers() {
+  async getUsers() {
     try {
-      return await userModel.find({}).lean()
+      const users = await userModel.find({}).lean()
+      return users;
     } catch (error) {
-      console.error("Error al obtener usuario:", error)
-      throw new Error("Error al consultar usuarios")
+      throw new Error(error.message);
     }
   }
 
@@ -35,15 +35,6 @@ class UserDAO {
     } catch (error) {
       console.error("Error al obtener usuario:", error)
       throw new Error("Usuario inexistente")
-    }
-  }
-
-  saveUser = async (user) => {
-    try {
-      return await userModel.create(user)
-    } catch (error) {
-      console.log(error.message)
-      return null
     }
   }
 
@@ -98,6 +89,22 @@ class UserDAO {
     }
   }
 
+  async verifyUser(userId) {
+    try {
+      const user = await userModel.findById(userId);
+      if (!user) {
+        throw new Error("Usuario no encontrado");
+      }
+
+      user.verified = true;
+      await user.save();
+      return user;
+    } catch (error) {
+      console.error("Error al verificar usuario:", error);
+      throw error;
+    }
+  }
+
   async updateUser(userId, cartId) {
     try {
       const result = await userModel.findByIdAndUpdate(userId, { cart: cartId })
@@ -108,12 +115,27 @@ class UserDAO {
     }
   }
 
-  async verifyUser(userId) {
+  async updateUserPassword(userId, newPassword) {
     try {
-      const user = await userModel.findByIdAndUpdate(userId, { verified: true }, { new: true })
-      return user
+      const updatedUser = await userModel.findByIdAndUpdate(
+        userId, 
+        { password: newPassword },
+        { new: true }  // Para devolver el documento actualizado
+      );
+      return updatedUser;
     } catch (error) {
-      throw error
+      console.error("Error al actualizar la contraseña:", error);
+      throw new Error("Error al actualizar la contraseña");
+    }
+  }
+
+  async updateUserRole(userId, newRole) {
+    try {
+      const result = await userModel.findByIdAndUpdate(userId, { role: newRole }, { new: true });
+      return result;
+    } catch (error) {
+      console.error("Error al actualizar el rol del usuario:", error);
+      throw error;
     }
   }
 

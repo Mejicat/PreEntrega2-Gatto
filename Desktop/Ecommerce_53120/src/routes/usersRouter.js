@@ -5,7 +5,6 @@ import jwtAuth from '../middlewares/jwtAuth.js';
 import jwt from 'jsonwebtoken';
 
 import UserService from "../services/userService.js";
-import auth from '../middlewares/auth.js';
 import isAdmin from "../middlewares/isAdmin.js";
 import { isValidPassword, createHash } from "../utils/bcrypt.js";
 
@@ -22,7 +21,7 @@ const transport = nodemailer.createTransport({
     }
 });
 
-router.get('/current', jwtAuth, auth, async (req, res, next) => {
+router.get('/current', jwtAuth, async (req, res, next) => {
   try {
     const user = await userService.getUserById(req.user.id); // Acá obtengo el id del JWT
     res.status(200).send({ status: 'success', message: 'User found', user });
@@ -31,7 +30,7 @@ router.get('/current', jwtAuth, auth, async (req, res, next) => {
   }
 })
 
-router.get('/users', jwtAuth, auth, isAdmin, async (req, res, next) => {
+router.get('/users', jwtAuth, isAdmin, async (req, res, next) => {
   try {
     const users = await userService.getUsers();
     res.status(200).send({ status: 'success', message: 'usuarios encontrados', users });
@@ -148,7 +147,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 
   const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
-  const resetLink = `http://localhost:8080/reset-password?token=${token}`;
+  const resetLink = `http://localhost:8080/api/users/reset-password?token=${token}`;
 
   await transport.sendMail({
       from: 'Lucas Gatto <lucas.gatto@recargapay.com>',
@@ -195,8 +194,8 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
-router.get('/premium/:uid', auth, async (req, res) => {
-  const user = await UserService.getUser(req.params.uid);
+router.get('/premium/:uid', jwtAuth, async (req, res) => {
+  const user = await userService.getUserById(req.params.uid);
   const roles = ['usuario', 'premium'];
   
   if (user.role === 'premium' || user.role === 'usuario') {
@@ -206,12 +205,12 @@ router.get('/premium/:uid', auth, async (req, res) => {
   }
 });
 
-router.put('/premium/:uid', async (req, res) => {
+router.put('/premium/:uid', jwtAuth, async (req, res) => {
   const uid = req.params.uid;
   const newRole = req.body.role;
 
   try {
-    await UserService.updateRole(uid, newRole);
+    await userService.updateUserRole(uid, newRole);
     res.status(200).send("Rol actualizado exitosamente.");
   } catch (error) {
     res.status(500).send("Error actualizando el rol");

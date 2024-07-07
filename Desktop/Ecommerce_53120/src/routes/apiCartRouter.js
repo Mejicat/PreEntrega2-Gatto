@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import jwtAuth from '../middlewares/jwtAuth.js';
-import auth from "../middlewares/auth.js";
 import checkProductOwnership from "../middlewares/checkProductOwnership.js";
 import CartService from "../services/cartService.js";
 import ProductService from "../services/productService.js";
@@ -10,7 +9,7 @@ import isAdmin from "../middlewares/isAdmin.js";
 
 const router = Router();
 
-router.post('/', jwtAuth, auth, async (req, res) => {
+router.post('/', jwtAuth, async (req, res) => {
   const userId = req.user._id;
 
   try {
@@ -21,7 +20,7 @@ router.post('/', jwtAuth, auth, async (req, res) => {
   }
 });
 
-router.get('/:cid', jwtAuth, auth, isAdmin, async (req, res) => {
+router.get('/:cid', jwtAuth, isAdmin, async (req, res) => {
   const cartId = req.params.cid;
 
   try {
@@ -32,7 +31,7 @@ router.get('/:cid', jwtAuth, auth, isAdmin, async (req, res) => {
   }
 });
 
-router.get('/', auth, isAdmin, async (req, res) => {
+router.get('/', jwtAuth, isAdmin, async (req, res) => {
   try {
     const carts = await CartService.getAllCarts();
     res.status(200).send({status:'success', message:'carritos encontrados', carts});
@@ -41,7 +40,7 @@ router.get('/', auth, isAdmin, async (req, res) => {
   }
 })
 
-router.post('/:cid/products/:pid', jwtAuth, auth, checkProductOwnership, async (req, res) => {
+router.post('/:cid/products/:pid', jwtAuth, checkProductOwnership, async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const userId = req.user._id;
@@ -67,7 +66,7 @@ router.post('/:cid/products/:pid', jwtAuth, auth, checkProductOwnership, async (
   }
 })
 
-router.put('/:cid/products/:pid', jwtAuth, auth, async (req, res) => {
+router.put('/:cid/products/:pid', jwtAuth, async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const quantity = +req.body.quantity;
@@ -90,7 +89,7 @@ router.put('/:cid/products/:pid', jwtAuth, auth, async (req, res) => {
   }
 })
 
-router.delete("/:cid", jwtAuth, auth, async (req, res) => {
+router.delete("/:cid", jwtAuth, async (req, res) => {
   const cartId = req.params.cid;
   const userId = req.user._id;
 
@@ -107,7 +106,7 @@ router.delete("/:cid", jwtAuth, auth, async (req, res) => {
   }
 })
 
-router.delete("/:cid/products/:pid", jwtAuth, auth, async (req, res) => {
+router.delete("/:cid/products/:pid", jwtAuth, async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const userId = req.user._id;
@@ -125,7 +124,7 @@ router.delete("/:cid/products/:pid", jwtAuth, auth, async (req, res) => {
   }
 })
 
-router.post('/:cid/purchase', jwtAuth, auth, async (req, res) => {
+router.post('/:cid/purchase', jwtAuth, async (req, res) => {
   const cartId = req.params.cid;
   const userId = req.user._id;
 

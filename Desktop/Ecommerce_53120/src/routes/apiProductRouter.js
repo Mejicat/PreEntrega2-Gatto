@@ -2,7 +2,6 @@ import express from 'express';
 
 import ProductService from "../services/productService.js";
 import jwtAuth from '../middlewares/jwtAuth.js';
-import auth from "../middlewares/auth.js";
 import isAdmin from "../middlewares/isAdmin.js";
 import CustomError from '../services/errors/customError.js';
 import { generateProductErrorInfo } from '../services/errors/info.js';
@@ -10,7 +9,7 @@ import { ErrorCodes } from '../services/errors/enums.js';
 
 const router = express.Router();
 
-router.get('/', jwtAuth, auth, async (req, res, next) => {
+router.get('/', jwtAuth, async (req, res, next) => {
     const limit = +req.query.limit || 10;
     const page = +req.query.page || 1;
     let { query = null, sort = null } = req.query;
@@ -30,7 +29,7 @@ router.get('/', jwtAuth, auth, async (req, res, next) => {
     }
   });
   
-  router.get('/:productId', jwtAuth, auth, async (req, res, next) => {
+  router.get('/:productId', jwtAuth, async (req, res, next) => {
     const productId = req.params.productId;
   
     try {
@@ -41,7 +40,7 @@ router.get('/', jwtAuth, auth, async (req, res, next) => {
     }
   });
   
-  router.post('/', jwtAuth, auth, isAdmin, async (req, res, next) => {
+  router.post('/', jwtAuth, isAdmin, async (req, res, next) => {
     const { title, description, code, category, thumbnails } = req.body.product;
     const price = +req.body.product.price;
     const stock = +req.body.product.stock;
@@ -85,7 +84,7 @@ router.get('/', jwtAuth, auth, async (req, res, next) => {
     }
   });
 
-router.put('/:productId', auth, isAdmin, async (req, res, next) => {
+router.put('/:productId', jwtAuth, isAdmin, async (req, res, next) => {
     const productId = req.params.productId;
     const productData = req.body;
 
@@ -115,7 +114,7 @@ router.put('/:productId', auth, isAdmin, async (req, res, next) => {
     }
 });
 
-router.delete('/:productId', auth, isAdmin, async (req, res, next) => {
+router.delete('/:productId', jwtAuth, isAdmin, async (req, res, next) => {
     const productId = req.params.productId;
 
     try {

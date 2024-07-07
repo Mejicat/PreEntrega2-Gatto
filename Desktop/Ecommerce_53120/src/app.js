@@ -12,6 +12,8 @@ import nodemailer from 'nodemailer';
 import flash from 'connect-flash';
 import compression from 'express-compression';
 import connectToMongo, { getMongoClient } from './dao/connection.js';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUiExpress from 'swagger-ui-express';
 
 import __dirname from './utils/constantsUtils.js';
 import initializatePassport from './config/passportConfig.js';
@@ -103,6 +105,19 @@ const initializeApp = async () => {
         res.status(404).send("Página no encontrada");
     });
 
+    const swaggerOptions = {
+        definition: {
+            openapi: '3.0.1',
+            info: {
+                title: 'Documentación sistema AdoptMe',
+                description: 'Esta documentación cubre toda la API habilitada para AdoptMe',
+            },
+        },
+        apis: ['./src/docs/**/*.yaml'], // todos los archivos de configuración de rutas estarán aquí
+    };
+    const specs = swaggerJsdoc(swaggerOptions);
+    app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
+
     // Manejo de errores
     //app.use(errorHandler);
 
@@ -135,7 +150,7 @@ const initializeApp = async () => {
     });
 
     const PORT = 8080;
-    
+
     const httpServer = app.listen(PORT, () => {
         startLogger(`Server Started at ${new Date().toLocaleTimeString()}`);
     });

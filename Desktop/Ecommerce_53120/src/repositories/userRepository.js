@@ -23,12 +23,12 @@ class UserRepository {
       }
   }
 
-  async getUser(user) {
+  async getUsers() {
     try {
-        const myUser = await this.dao.getUser(user);
-        return myUser;
+      const users = await this.dao.getUsers();
+      return users.map(user => new UserDto(user));
     } catch (error) {
-        throw new Error(error.message);
+      throw new Error(error.message);
     }
   }
 
@@ -47,6 +47,42 @@ class UserRepository {
       return new UserDto(user);
     } catch (error) {
       throw new Error(`User with ID ${userId} not found`);
+    }
+  }
+
+  async registerUser(user) {
+    try {
+      const newUser = await this.dao.registerUser(user);
+      return new UserDto(newUser);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async verifyUser(userId) {
+    try {
+      const user = await this.dao.verifyUser(userId);
+      return new UserDto(user);
+    } catch (error) {
+      throw new Error(`Error al verificar usuario: ${error.message}`);
+    }
+  }
+
+  async updateUserPassword(userId, newPassword) {
+    try {
+      const updatedUser = await this.dao.updateUserPassword(userId, newPassword);
+      return updatedUser;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async updateUserRole(userId, newRole) {
+    try {
+      const user = await this.dao.updateUserRole(userId, newRole);
+      return new UserDto(user);
+    } catch (error) {
+      throw new Error(`Error updating user role: ${error.message}`);
     }
   }
 }

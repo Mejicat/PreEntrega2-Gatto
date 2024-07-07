@@ -50,9 +50,9 @@ class UserService {
         }
       }
     
-      async updateUser(userId, cartId) {
+      async updateUserRole (userId, cartId) {
         try {
-          const user = await userRepository.updateUser(userId, cartId);
+          const user = await userRepository.updateUserRole(userId, cartId);
           if (!user) {
             throw new Error("Error al actualizar al usuario");
           }
@@ -75,9 +75,14 @@ class UserService {
         }
       }
 
-      async updateUserPassword(id, newPassword) {
-        return await userRepository.findByIdAndUpdate(id, { password: newPassword });
-    }
+      async updateUserPassword(userId, newPassword) {
+        try {
+          const updatedUser = await userRepository.updateUserPassword(userId, newPassword);
+          return new UserDTO(updatedUser);
+        } catch (error) {
+          throw error;
+        }
+      }
 
     }
 
