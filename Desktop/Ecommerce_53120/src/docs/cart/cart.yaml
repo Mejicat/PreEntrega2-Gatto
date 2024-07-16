@@ -64,6 +64,40 @@ paths:
           description: Error en la obtención del carrito
 
   /{cid}/products/{pid}:
+    
+    delete:
+      summary: Eliminar un producto del carrito
+      security:
+        - bearerAuth: []
+      tags:
+        - Carritos
+      parameters:
+        - name: cid
+          in: path
+          required: true
+          description: ID del carrito
+          schema:
+            type: string
+        - name: pid
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Producto eliminado del carrito exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          description: Error en la eliminación del producto del carrito
     post:
       summary: Agregar un producto al carrito
       security:
@@ -152,41 +186,6 @@ paths:
                     $ref: '#/components/schemas/Cart'
         '400':
           description: Error en la actualización de la cantidad del producto
-
-  /{cid}/products/{pid}:
-    delete:
-      summary: Eliminar un producto del carrito
-      security:
-        - bearerAuth: []
-      tags:
-        - Carritos
-      parameters:
-        - name: cid
-          in: path
-          required: true
-          description: ID del carrito
-          schema:
-            type: string
-        - name: pid
-          in: path
-          required: true
-          description: ID del producto
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Producto eliminado del carrito exitosamente
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  message:
-                    type: string
-        '400':
-          description: Error en la eliminación del producto del carrito
 
 components:
   schemas:

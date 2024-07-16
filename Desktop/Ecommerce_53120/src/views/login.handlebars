@@ -46,14 +46,16 @@
     const password = document.getElementById('password').value;
 
     try {
-      const response = await axios.post('/api/sessions/login', { email, password });
-      if (response.data.status === 'success') {
+      const response = await fetch.post('/api/users/login', { email, password });
+      console.log(response)
+    /*  if (response.data.status === 'success') {
         window.location.href = '/views/carts';
       } else {
         alert('Login failed');
-      }
+      }*/
     } catch (error) {
       alert('Login failed');
+      console.log(error)
     }
   });
 </script>

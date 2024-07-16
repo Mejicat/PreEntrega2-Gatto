@@ -85,6 +85,18 @@ const initializeApp = async () => {
             res.redirect('/views/sessions/login');
         }
     });
+    const swaggerOptions = {
+        definition: {
+            openapi: '3.0.1',
+            info: {
+                title: 'Documentación sistema AdoptMe',
+                description: 'Esta documentación cubre toda la API habilitada para AdoptMe',
+            },
+        },
+        apis: ['./src/docs/**/*.yaml'], // todos los archivos de configuración de rutas estarán aquí
+    };
+    const specs = swaggerJsdoc(swaggerOptions);
+    app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
 
     // Router respuesta tradicional / endpoint
     app.use('/api/products', apiProductRouter);
@@ -105,18 +117,7 @@ const initializeApp = async () => {
         res.status(404).send("Página no encontrada");
     });
 
-    const swaggerOptions = {
-        definition: {
-            openapi: '3.0.1',
-            info: {
-                title: 'Documentación sistema AdoptMe',
-                description: 'Esta documentación cubre toda la API habilitada para AdoptMe',
-            },
-        },
-        apis: ['./src/docs/**/*.yaml'], // todos los archivos de configuración de rutas estarán aquí
-    };
-    const specs = swaggerJsdoc(swaggerOptions);
-    app.use('/api/docs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
+
 
     // Manejo de errores
     //app.use(errorHandler);
