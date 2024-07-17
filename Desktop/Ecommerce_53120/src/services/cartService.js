@@ -14,9 +14,9 @@ class CartService {
       return new CartDTO(newCart);
   }
     
-      async getCart(id) {
+      async getCart(userId) {
         try {
-          const cart = await cartRepository.getCart(id)
+          const cart = await cartRepository.getCart(userId)
           return new CartDTO(cart)
         } catch (error) {
           throw error

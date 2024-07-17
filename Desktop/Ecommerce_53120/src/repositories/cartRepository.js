@@ -32,9 +32,9 @@ class CartRepository {
         }
     }
 
-    async addCart(products = []) {
+    async addCart(userId) {
         try {
-            const results = await this.dao.addCart(products);
+            const results = await this.dao.addCart(userId);
             return new CartDto(results);
         } catch (error) {
             throw new Error(`No se pudo agregar el carrito`);
