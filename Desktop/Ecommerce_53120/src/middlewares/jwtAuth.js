@@ -1,19 +1,19 @@
 import jwt from 'jsonwebtoken';
 
 const jwtAuth = (req, res, next) => {
-  const token = req.cookies.auth || req.headers.authorization?.split(' ')[1];
-
+  const token = req.cookies.auth;
   if (!token) {
-    return res.status(401).send({ status: 'error', message: 'No token provided' });
+    return res.redirect('/views/sessions/login');
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'coderSecret', (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET || "coderSecret", (err, decoded) => {
     if (err) {
-      return res.status(401).send({ status: 'error', message: 'Failed to authenticate token' });
+      return res.redirect('/views/sessions/login');
     }
-    req.user = decoded;
+    req.user = { id: decoded.id, role: decoded.role };
     next();
   });
 };
 
 export default jwtAuth;
+

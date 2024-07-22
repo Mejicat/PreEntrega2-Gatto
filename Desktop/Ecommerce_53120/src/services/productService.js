@@ -1,4 +1,4 @@
-import { productRepository } from "../repositories/index.js" ;
+import { productRepository } from "../repositories/index.js";
 import ProductDTO from "../dao/dto/productDTO.js";
 
 class ProductService {
@@ -13,7 +13,7 @@ class ProductService {
 
     async getProductById(id) {
         try {
-            const product = await productRepository.getProductByID(id);
+            const product = await productRepository.getProductById(id);
             if (!product) {
                 throw new Error("Product not found");
             }

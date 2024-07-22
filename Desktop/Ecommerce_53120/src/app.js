@@ -62,7 +62,8 @@ const initializeApp = async () => {
         }),
         secret: 'secretPhrase',
         resave: true,
-        saveUninitialized: true
+        saveUninitialized: true,
+        name: 'auth'
     }));
 
     // Passport
@@ -161,3 +162,6 @@ const initializeApp = async () => {
 };
 
 initializeApp();
+
+
+export default app;

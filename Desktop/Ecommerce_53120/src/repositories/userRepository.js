@@ -85,6 +85,14 @@ class UserRepository {
       throw new Error(`Error updating user role: ${error.message}`);
     }
   }
+
+  async deleteUserByEmail(email) {
+    try {
+      await this.dao.deleteUserByEmail(email);
+    } catch (error) {
+      throw new Error(`Error deleting user: ${error.message}`);
+    }
+  }
 }
 
 export default UserRepository;

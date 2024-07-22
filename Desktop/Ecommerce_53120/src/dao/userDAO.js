@@ -148,6 +148,11 @@ class UserDAO {
       throw error
     }
   }
+
+  async deleteUserByEmail(email) {
+    return await userModel.deleteOne({ email });
+  }
+  
 }
 
 export default UserDAO;

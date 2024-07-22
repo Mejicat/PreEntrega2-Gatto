@@ -1,101 +1,88 @@
-import request from 'supertest';
-import express from 'express';
-import mongoose from 'mongoose';
-
-import apiProductRouter from '../src/routes/apiProductRouter.js';
+import { expect } from 'chai';
 import connectToMongo from '../src/dao/connection.js';
+import { productRepository } from '../src/repositories/index.js';
 
+const chai_expect = expect;
 
-const app = express();
-app.use(express.json());
-app.use('/api/products', apiProductRouter);
+const testProductData = {
+    title: "Test Product2",
+    description: "Test Description2",
+    code: "Test124",
+    price: 10,
+    status: true,
+    stock: 100,
+    category: "Test",
+    owner: "user",
+};
 
-describe('Tests de API de productos', function () {
+let testProduct;
+
+connectToMongo();
+
+describe("Tests Product DAO", () => {
     before(async function () {
-        await connectToMongo();
+        // Se ejecuta antes de comenzar el paquete de tests
+    });
+
+    beforeEach(async function () {
+        // Crear un producto antes de cada test
+        try {
+            const result = await productRepository.createProduct(testProductData, { role: 'user', email: 'user@example.com' });
+            testProduct = result;
+        } catch (error) {
+            console.error("Error al crear el producto en beforeEach:", error);
+        }
+    });
+
+    afterEach(async function () {
+        // Verificar si el producto existe antes de intentar eliminarlo
+        if (testProduct && testProduct._id) {
+            try {
+                const productExists = await productRepository.getProductById(testProduct._id);
+                if (productExists) {
+                    await productRepository.deleteProduct(testProduct._id);
+                }
+            } catch (error) {
+                console.error("Error al eliminar el producto en afterEach:", error);
+            }
+        }
     });
 
     after(async function () {
-        await mongoose.disconnect();
+        // Se ejecuta después de finalizar el paquete de tests
     });
 
-    it('GET /api/products debe retornar una lista de productos', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const response = await request(app)
-            .get('/api/products')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        assert(response.body.products, 'Debe retornar una lista de productos');
+    it("getAllProducts() debe retornar un array con los productos", async () => {
+        const result = await productRepository.getAllProducts();
+        chai_expect(result).to.be.an("array");
     });
 
-    it('GET /api/products/:productId debe retornar un producto por ID', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const productId = 'productId_valido'; // Colocar un ID de producto válido
-        const response = await request(app)
-            .get(`/api/products/${productId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        assert(response.body.product, 'Debe retornar un producto');
+    it("createProduct() debe retornar un objeto con el producto creado", async () => {
+        const result = await productRepository.createProduct(testProductData, { role: 'user', email: 'user@example.com' });
+        chai_expect(result).to.be.an("object");
+        chai_expect(result._id).to.be.not.null;
+        chai_expect(result.thumbnails).to.be.deep.equal([]);
     });
 
-    it('POST /api/products debe agregar un nuevo producto', async function () {
-        const token = 'token_admin_valido'; // Colocar un token JWT válido de un admin
-        const newProduct = {
-            product: {
-                title: 'Nuevo Producto',
-                description: 'Descripción del nuevo producto',
-                code: 'codigo123',
-                price: 100,
-                stock: 50,
-                category: 'Categoría',
-                thumbnails: ['thumbnail1.jpg']
-            }
-        };
-        const response = await request(app)
-            .post('/api/products')
-            .set('Authorization', `Bearer ${token}`)
-            .send(newProduct)
-            .expect(201);
-
-        assert(response.body.product, 'Debe retornar el producto agregado');
-        assert.strictEqual(response.body.product.title, newProduct.product.title, 'El título del producto debe coincidir');
+    it("getProductById() debe retornar un objeto con el producto", async () => {
+        const result = await productRepository.getProductById(testProduct._id);
+        chai_expect(result).to.be.an("object");
+        chai_expect(result._id).to.be.not.null;
+        chai_expect(result.title).to.be.equal(testProduct.title);
     });
 
-    it('PUT /api/products/:productId debe actualizar un producto', async function () {
-        const token = 'token_admin_valido'; // Colocar un token JWT válido de un admin
-        const productId = 'productId_valido'; // Colocar un ID de producto válido
-        const updatedProduct = {
-            title: 'Producto Actualizado',
-            price: 150
-        };
-        const response = await request(app)
-            .put(`/api/products/${productId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send(updatedProduct)
-            .expect(200);
-
-        assert(response.body.product, 'Debe retornar el producto actualizado');
-        assert.strictEqual(response.body.product.title, updatedProduct.title, 'El título del producto debe coincidir');
+    it("updateProduct() debe retornar un objeto con el producto actualizado", async () => {
+        await productRepository.updateProduct(testProduct._id, { title: "Test Product Updated" });
+        const updatedProduct = await productRepository.getProductById(testProduct._id);
+        chai_expect(updatedProduct).to.be.an("object");
+        chai_expect(updatedProduct._id).to.be.not.null;
+        chai_expect(updatedProduct.title).to.be.equal("Test Product Updated");
     });
 
-    it('DELETE /api/products/:productId debe eliminar un producto', async function () {
-        const token = 'token_admin_valido'; // Colocar un token JWT válido de un admin
-        const productId = 'productId_valido'; // Colocar un ID de producto válido
-        const response = await request(app)
-            .delete(`/api/products/${productId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        assert(response.body.product, 'Debe retornar el producto eliminado');
-    });
-
-    it('GET /api/products/mockingproducts debe retornar productos mock', async function () {
-        const response = await request(app)
-            .get('/api/products/mockingproducts')
-            .expect(200);
-
-        assert(response.body.products, 'Debe retornar una lista de productos mock');
+    it("deleteProduct() debe retornar un objeto con el producto eliminado", async () => {
+        const result = await productRepository.deleteProduct(testProduct._id);
+        chai_expect(result).to.be.an("object");
     });
 });
+
+

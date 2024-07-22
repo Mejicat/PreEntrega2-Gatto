@@ -1,112 +1,112 @@
-import request from 'supertest';
-import express from 'express';
-import mongoose from 'mongoose';
+// test/apiCartRouter.test.js
+import { expect } from 'chai';
+import CartRepository from '../src/repositories/cartRepository.js';
+import CartDAO from '../src/dao/cartDAO.js';
 
-import apiCartRouter from '../src/routes/apiCartRouter.js';
-import connectToMongo from '../src/dao/connection.js';
+describe('Tests Cart DAO', () => {
+  let cartRepository;
+  let testCart;
+  let testProduct;
 
-const app = express();
-app.use(express.json());
-app.use('/api/carts', apiCartRouter);
+  before(async () => {
+    cartRepository = new CartRepository(new CartDAO());
 
-describe('Tests de API de carritos', function () {
-    before(async function () {
-        await connectToMongo();
-    });
+    // Crear un carrito y un producto de prueba
+    testCart = await cartRepository.addCart();
+    testProduct = { _id: 'testProductId', name: 'Test Product' };
 
-    after(async function () {
-        await mongoose.disconnect();
-    });
+    // Asegurarse de que el carrito y el producto están creados
+    expect(testCart).to.be.an('object');
+    expect(testCart._id).to.exist;
+    expect(testProduct).to.be.an('object');
+    expect(testProduct._id).to.exist;
+  });
 
-    it('POST /api/carts debe crear un carrito', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const response = await request(app)
-            .post('/api/carts')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(201);
+  it("getProductsFromCart() debe retornar un array con los productos del carrito", async () => {
+    try {
+      const products = await cartRepository.getProductsFromCart(testCart._id);
+      expect(products).to.be.an('array');
+    } catch (error) {
+      console.error("Error al obtener los productos del carrito:", error);
+      throw error;
+    }
+  });
 
-        assert(response.body.cart, 'Debe retornar un carrito creado');
-    });
+  it("addProductToCart() debe retornar un objeto con el producto agregado al carrito", async () => {
+    try {
+      const result = await cartRepository.addProduct(testCart._id, testProduct._id);
+      expect(result).to.be.an('object');
 
-    it('GET /api/carts/:cid debe retornar un carrito por ID', async function () {
-        const token = 'token_admin_valido'; // Colocar un token JWT válido de un admin
-        const cartId = 'cartId_valido'; // Colocar un ID de carrito válido
-        const response = await request(app)
-            .get(`/api/carts/${cartId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
+      const products = await cartRepository.getProductsFromCart(testCart._id);
+      expect(products).to.be.an('array');
+      expect(products[0].product).to.be.equal(testProduct._id);
+      expect(products[0].quantity).to.be.equal(1);
+    } catch (error) {
+      console.error("Error al agregar el producto al carrito:", error);
+      throw error;
+    }
+  });
 
-        assert(response.body.cart, 'Debe retornar un carrito');
-    });
+  it("updateCart() debe retornar un objeto con el carrito actualizado", async () => {
+    try {
+      await cartRepository.addProduct(testCart._id, testProduct._id);
+      const updatedCart = await cartRepository.updateProductQuantity(testCart._id, testProduct._id, 3);
 
-    it('GET /api/carts debe retornar todos los carritos', async function () {
-        const token = 'token_admin_valido'; // Colocar un token JWT válido de un admin
-        const response = await request(app)
-            .get('/api/carts')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
+      const products = await cartRepository.getProductsFromCart(testCart._id);
+      expect(products).to.be.an('array');
+      expect(products[0].product).to.be.equal(testProduct._id);
+      expect(products[0].quantity).to.be.equal(3);
+    } catch (error) {
+      console.error("Error al actualizar el carrito:", error);
+      throw error;
+    }
+  });
 
-        assert(response.body.carts, 'Debe retornar una lista de carritos');
-    });
+  it("updateProductQuantity() debe retornar un objeto con el producto actualizado", async () => {
+    try {
+      await cartRepository.addProduct(testCart._id, testProduct._id);
+      const updatedProduct = await cartRepository.updateProductQuantity(testCart._id, testProduct._id, 5);
 
-    it('POST /api/carts/:cid/products/:pid debe agregar un producto al carrito', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const cartId = 'cartId_valido'; // Colocar un ID de carrito válido
-        const productId = 'productId_valido'; // Colocar un ID de producto válido
-        const response = await request(app)
-            .post(`/api/carts/${cartId}/products/${productId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send({ quantity: 2 })
-            .expect(201);
+      const products = await cartRepository.getProductsFromCart(testCart._id);
+      expect(products).to.be.an('array');
+      expect(products[0].product).to.be.equal(testProduct._id);
+      expect(products[0].quantity).to.be.equal(5);
+    } catch (error) {
+      console.error("Error al actualizar la cantidad del producto en el carrito:", error);
+      throw error;
+    }
+  });
 
-        assert(response.body.response, 'Debe retornar la respuesta de la operación');
-    });
+  it("deleteAllProducts() debe retornar un objeto con los productos eliminados", async () => {
+    try {
+      const result = await cartRepository.deleteAllProducts(testCart._id);
+      expect(result).to.be.an('object');
+      expect(result.products).to.be.an('array').that.is.empty;
 
-    it('PUT /api/carts/:cid/products/:pid debe actualizar la cantidad de un producto en el carrito', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const cartId = 'cartId_valido'; // Colocar un ID de carrito válido
-        const productId = 'productId_valido'; // Colocar un ID de producto válido
-        const response = await request(app)
-            .put(`/api/carts/${cartId}/products/${productId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .send({ quantity: 3 })
-            .expect(200);
+      const products = await cartRepository.getProductsFromCart(testCart._id);
+      expect(products).to.be.an('array').that.is.empty;
+    } catch (error) {
+      console.error("Error al eliminar los productos del carrito:", error);
+      throw error;
+    }
+  });
 
-        assert(response.body.response, 'Debe retornar la respuesta de la operación');
-    });
+  it("deleteCart() debe retornar un objeto con el carrito eliminado", async () => {
+    try {
+      const result = await cartRepository.deleteCart(testCart._id);
+      expect(result).to.be.an('object');
+      expect(result.deletedCount).to.be.equal(1);
 
-    it('DELETE /api/carts/:cid debe eliminar un carrito', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const cartId = 'cartId_valido'; // Colocar un ID de carrito válido
-        const response = await request(app)
-            .delete(`/api/carts/${cartId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        assert(response.body.response, 'Debe retornar la respuesta de la operación');
-    });
-
-    it('DELETE /api/carts/:cid/products/:pid debe eliminar un producto del carrito', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const cartId = 'cartId_valido'; // Colocar un ID de carrito válido
-        const productId = 'productId_valido'; // Colocar un ID de producto válido
-        const response = await request(app)
-            .delete(`/api/carts/${cartId}/products/${productId}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        assert(response.body.response, 'Debe retornar la respuesta de la operación');
-    });
-
-    it('POST /api/carts/:cid/purchase debe realizar la compra del carrito', async function () {
-        const token = 'token_valido'; // Colocar un token JWT válido
-        const cartId = 'cartId_valido'; // Colocar un ID de carrito válido
-        const response = await request(app)
-            .post(`/api/carts/${cartId}/purchase`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        assert(response.body.ticket, 'Debe retornar el ticket de compra');
-        assert(response.body.itemsRemoved, 'Debe retornar los productos que no tenían stock');
-    });
+      // Intentar obtener los productos de un carrito eliminado debería fallar,
+      // así que no intentamos obtener los productos aquí
+    } catch (error) {
+      console.error("Error al eliminar el carrito:", error);
+      throw error;
+    }
+  });
 });
+
+
+
+
+

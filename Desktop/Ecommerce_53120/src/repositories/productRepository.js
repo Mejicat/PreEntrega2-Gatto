@@ -14,46 +14,68 @@ class ProductRepository {
         }
     }
 
-    async getProductById(pid) {
+    async getProductById(id) {
         try {
-            const product = await this.dao.getProductById(pid);
+            const product = await this.dao.getProductById(id);
             return new ProductDto(product);
         } catch (error) {
-            throw new Error(`Product with ID ${pid} not found`);
+            throw new Error(`Product with ID ${id} not found`);
         }
     }
 
-    async addProducts(pid, user) {
+    async addProducts(productData, user) {
         try {
-            const product = await this.dao.addProducts(pid, user);        
+            const product = await this.dao.addProducts(productData, user);        
             return new ProductDto(product);
         } catch (error) {
-             throw new Error(`Could not add this Product ${pid}`);
+            throw new Error(`Could not add this Product ${productData}`);
         }
     }
 
-    async updateProduct(pid, productUpdate) {
+    async updateProduct(id, productUpdate) {
         try {
-            await this.dao.getProductById(pid);
-            const updatedProduct = await this.dao.updateProduct(pid, productUpdate);
+            await this.dao.getProductById(id);
+            const updatedProduct = await this.dao.updateProduct(id, productUpdate);
             return new ProductDto(updatedProduct);
         } catch (error) {
-            throw new Error(`Could not update this Product ${pid}`);
+            throw new Error(`Could not update this Product ${id}`);
         }
     }
 
-    async deleteProduct(pid) {
-        try{
-            const product = await this.dao.getProductById(pid);
+    async deleteProduct(id) {
+        try {
+            const product = await this.dao.getProductById(id);
 
             if (!product) {
-                throw new Error(`Product ${pid} not found`);
+                throw new Error(`Product ${id} not found`);
             }
-        
-            const deletedProduct = await this.dao.deleteProduct(product);
+
+            const deletedProduct = await this.dao.deleteProduct(id);
             return new ProductDto(deletedProduct);
         } catch (error) {
-            throw new Error(`Could not delete this Product ${pid}`);
+            throw new Error(`Could not delete this Product ${id}`);
+        }
+    }
+
+    async getAllProducts(limit, page, query, sort) {
+        try {
+            const products = await this.dao.getProducts(limit, page, query, sort);
+            return products.map(product => new ProductDto(product));
+        } catch (error) {
+            throw new Error(`Error fetching data: ${error.message}`);
+        }
+    }
+
+    async createProduct(productData, user) {
+        try {
+            if (!user || !user.role) {
+                throw new Error("El usuario no tiene el rol adecuado");
+            }
+    
+            const product = await this.dao.addProducts(productData, user);
+            return new ProductDto(product);
+        } catch (error) {
+            throw new Error(`Could not create the product: ${error.message}`);
         }
     }
 }

@@ -80,7 +80,7 @@ router.post('/login', async (req, res, next) => {
       return res.status(400).send({ status: "error", message: "Credenciales inválidas" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "coderSecret", { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || "coderSecret", { expiresIn: '1h' });
     res.cookie("auth", token, { maxAge: 60 * 60 * 1000 }).send({ status: "success", token });
   } catch (error) {
     next(error);

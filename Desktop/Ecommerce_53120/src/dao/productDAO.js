@@ -19,28 +19,29 @@ class ProductDAO {
 
     async getProducts(limit, page, query, sort) {
         try {
-            return await productModel.paginate(query, { limit, page, sort, lean: true });
+            const result = await productModel.paginate(query, { limit, page, sort, lean: true });
+            return result.docs; // Retorna solo el array de productos
         } catch (error) {
             console.error(`Error al buscar los productos: ${error.message}`);
             throw new Error("Error al buscar los productos");
         }
     }
-
-    async getProductById(pid) {
+    
+    async getProductById(id) {
         try {
-            const product = await productModel.findOne({ _id: pid });
+            const product = await productModel.findOne({ _id: id });
 
-            if (!product) throw new Error(`El producto ${pid} no existe!`);
+            if (!product) throw new Error(`El producto ${id} no existe!`);
 
             return product;
         } catch (error) {
-            console.error(`Error al obtener el producto con ID ${pid}: ${error.message}`);
-            throw new Error(`Error al obtener el producto con ID ${pid}`);
+            console.error(`Error al obtener el producto con ID ${id}: ${error.message}`);
+            throw new Error(`Error al obtener el producto con ID ${id}`);
         }
     }
 
-    async addProducts(pid, user) {
-        const { title, description, code, price, stock, category, thumbnails } = pid;
+    async addProducts(productData, user) {
+        const { title, description, code, price, stock, category, thumbnails } = productData;
 
         if (!title || !description || !code || !price || !stock || !category) {
             throw new Error('Error al crear el producto');
@@ -56,29 +57,29 @@ class ProductDAO {
         }
     }
 
-    async updateProduct(pid, productUpdate) {
+    async updateProduct(id, productUpdate) {
         try {
-            const result = await productModel.updateOne({ _id: pid }, productUpdate);
+            const result = await productModel.updateOne({ _id: id }, productUpdate);
 
-            if (result.nModified === 0) throw new Error(`No se encontró el producto ${pid} para actualizar`);
+            if (result.nModified === 0) throw new Error(`No se encontró el producto ${id} para actualizar`);
 
             return result;
         } catch (error) {
-            console.error(`Error al actualizar el producto ${pid}: ${error.message}`);
+            console.error(`Error al actualizar el producto ${id}: ${error.message}`);
             throw new Error('Error al actualizar el producto');
         }
     }
 
-    async deleteProduct(pid) {
+    async deleteProduct(id) {
         try {
-            const result = await productModel.deleteOne({ _id: pid });
+            const result = await productModel.deleteOne({ _id: id });
 
-            if (result.deletedCount === 0) throw new Error(`El producto ${pid} no existe!`);
+            if (result.deletedCount === 0) throw new Error(`El producto ${id} no existe!`);
 
             return result;
         } catch (error) {
-            console.error(`Error al eliminar el producto ${pid}: ${error.message}`);
-            throw new Error(`Error al eliminar el producto ${pid}`);
+            console.error(`Error al eliminar el producto ${id}: ${error.message}`);
+            throw new Error(`Error al eliminar el producto ${id}`);
         }
     }
 }
