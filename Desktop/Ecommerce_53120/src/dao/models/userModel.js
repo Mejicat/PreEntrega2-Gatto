@@ -41,7 +41,14 @@ const userSchema = new mongoose.Schema({
     verified: {
         type: Boolean,
         default: false
-      },
+    },
+    documents: { 
+        type: [{ name: String, 
+            reference: String }] 
+    },
+    last_connection: {
+        type: Date
+    },
     cart: {
         type: [
             {
@@ -57,7 +64,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.plugin(mongoosePaginate)
 
-userSchema.pre("save", function(){
+userSchema.pre("save", function () {
     this.password = createHash(this.password)
 })
 
